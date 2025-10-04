@@ -75,7 +75,7 @@ const Landing = () => {
               <Sparkles className="w-6 h-6 text-primary" />
             </div>
             <span className={`text-2xl font-bold ${theme === 'neon' ? 'neon-glow' : ''}`}>
-              NexusHub
+              AJS-Hub
             </span>
           </div>
           <div className="flex items-center gap-4">
@@ -107,9 +107,7 @@ const Landing = () => {
           }`}>
             Transform Your
             <br />
-            <span className={theme === 'neon' ? 'gradient-neon bg-clip-text text-transparent' : 'gradient-luxe bg-clip-text text-transparent'}>
-              Digital Experience
-            </span>
+            Digital Experience
           </h1>
           
           <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -198,7 +196,7 @@ const Landing = () => {
             Ready to Get Started?
           </h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of organizations already using NexusHub to transform their operations
+            Join thousands of organizations already using AJS-Hub to transform their operations
           </p>
           <Link to="/login">
             <Button 
@@ -218,7 +216,7 @@ const Landing = () => {
       {/* Footer */}
       <footer className="relative z-10 border-t border-border py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>© 2025 NexusHub. All rights reserved.</p>
+          <p>© 2025 AJS-Hub. All rights reserved.</p>
         </div>
       </footer>
     </div>

@@ -81,7 +81,7 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
         <div className="p-6 border-b border-border">
           {!sidebarCollapsed && (
             <h2 className={`text-2xl font-bold ${theme === 'neon' ? 'neon-glow' : ''}`}>
-              NexusHub
+              AJS-Hub
             </h2>
           )}
           {sidebarCollapsed && (
