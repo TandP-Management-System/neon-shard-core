@@ -1,59 +1,47 @@
-import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
-import { Button } from '@/components/ui/button';
+import DashboardLayout from '@/components/DashboardLayout';
 import { Card } from '@/components/ui/card';
-import ThemeToggle from '@/components/ThemeToggle';
-import { LogOut, Users, Building2, GraduationCap, BarChart3 } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Users, Building2, GraduationCap, BarChart3, TrendingUp } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 const AdminDashboard = () => {
-  const { user, logout } = useAuth();
   const { theme } = useTheme();
 
   const stats = [
-    { icon: Users, label: 'Total Users', value: '1,234', color: 'text-primary' },
-    { icon: Building2, label: 'Departments', value: '12', color: 'text-secondary' },
-    { icon: GraduationCap, label: 'Students', value: '987', color: 'text-accent' },
-    { icon: BarChart3, label: 'Active Sessions', value: '456', color: 'text-primary' },
+    { icon: Users, label: 'Total Users', value: '1,234', change: '+12%', color: 'text-primary' },
+    { icon: Building2, label: 'Departments', value: '12', change: '+2', color: 'text-secondary' },
+    { icon: GraduationCap, label: 'Students', value: '987', change: '+45', color: 'text-accent' },
+    { icon: BarChart3, label: 'Active Sessions', value: '456', change: '+23%', color: 'text-primary' },
+  ];
+
+  const departments = [
+    { id: 1, name: 'Computer Science', students: 245, faculty: 24, head: 'Dr. Sarah Johnson' },
+    { id: 2, name: 'Mathematics', students: 198, faculty: 18, head: 'Prof. Michael Chen' },
+    { id: 3, name: 'Physics', students: 167, faculty: 16, head: 'Dr. Emily Davis' },
+    { id: 4, name: 'Chemistry', students: 189, faculty: 20, head: 'Prof. Robert Brown' },
+    { id: 5, name: 'Biology', students: 156, faculty: 15, head: 'Dr. Lisa Anderson' },
+  ];
+
+  const recentStudents = [
+    { id: 1, name: 'John Doe', email: 'john.doe@university.edu', department: 'Computer Science', enrolled: '2025-01-15' },
+    { id: 2, name: 'Jane Smith', email: 'jane.smith@university.edu', department: 'Mathematics', enrolled: '2025-01-14' },
+    { id: 3, name: 'Mike Johnson', email: 'mike.j@university.edu', department: 'Physics', enrolled: '2025-01-14' },
+    { id: 4, name: 'Sarah Williams', email: 'sarah.w@university.edu', department: 'Chemistry', enrolled: '2025-01-13' },
+    { id: 5, name: 'David Lee', email: 'david.lee@university.edu', department: 'Biology', enrolled: '2025-01-13' },
   ];
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute top-1/4 -left-48 w-96 h-96 rounded-full blur-3xl opacity-10 animate-pulse ${
-          theme === 'neon' ? 'bg-primary' : 'bg-primary'
-        }`} />
-        <div className={`absolute bottom-1/4 -right-48 w-96 h-96 rounded-full blur-3xl opacity-10 animate-pulse delay-1000 ${
-          theme === 'neon' ? 'bg-secondary' : 'bg-primary'
-        }`} />
-      </div>
-
-      <div className="relative z-10 container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className={`text-4xl font-bold ${theme === 'neon' ? 'neon-glow' : ''}`}>
-              Admin Dashboard
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Welcome back, {user?.name}!
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <Button 
-              onClick={logout}
-              variant="outline"
-              className={theme === 'neon' ? 'neon-border' : 'luxe-glow'}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
-            </Button>
-          </div>
-        </div>
-
+    <DashboardLayout userRole="admin">
+      <div className="p-6 space-y-6">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -71,77 +59,77 @@ const AdminDashboard = () => {
                   }`}>
                     <Icon className={`w-6 h-6 ${stat.color}`} />
                   </div>
-                  <span className="text-3xl font-bold">{stat.value}</span>
+                  <div className="text-right">
+                    <div className="flex items-center gap-1 text-sm text-green-500">
+                      <TrendingUp className="w-4 h-4" />
+                      <span>{stat.change}</span>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-muted-foreground">{stat.label}</p>
+                <div className="space-y-1">
+                  <p className="text-3xl font-bold">{stat.value}</p>
+                  <p className="text-sm text-muted-foreground">{stat.label}</p>
+                </div>
               </Card>
             );
           })}
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className={`p-6 ${
-            theme === 'neon' ? 'glass neon-border' : 'glass-luxe'
-          }`}>
-            <h2 className="text-2xl font-bold mb-4">Recent Activity</h2>
-            <div className="space-y-4">
-              <div className="flex items-center gap-4 p-3 rounded-lg bg-background/50">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">New user registered</p>
-                  <p className="text-sm text-muted-foreground">2 minutes ago</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-3 rounded-lg bg-background/50">
-                <div className="w-10 h-10 rounded-full bg-secondary/20 flex items-center justify-center">
-                  <Building2 className="w-5 h-5 text-secondary" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">Department updated</p>
-                  <p className="text-sm text-muted-foreground">15 minutes ago</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 p-3 rounded-lg bg-background/50">
-                <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
-                  <GraduationCap className="w-5 h-5 text-accent" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium">Student enrolled</p>
-                  <p className="text-sm text-muted-foreground">1 hour ago</p>
-                </div>
-              </div>
-            </div>
-          </Card>
+        {/* Departments Table */}
+        <Card className={`p-6 ${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'}`}>
+          <h2 className="text-2xl font-bold mb-4">Departments Overview</h2>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Students</TableHead>
+                  <TableHead>Faculty</TableHead>
+                  <TableHead>Department Head</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {departments.map((dept) => (
+                  <TableRow key={dept.id}>
+                    <TableCell className="font-medium">{dept.name}</TableCell>
+                    <TableCell>{dept.students}</TableCell>
+                    <TableCell>{dept.faculty}</TableCell>
+                    <TableCell>{dept.head}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
 
-          <Card className={`p-6 ${
-            theme === 'neon' ? 'glass neon-border' : 'glass-luxe'
-          }`}>
-            <h2 className="text-2xl font-bold mb-4">Quick Actions</h2>
-            <div className="space-y-3">
-              <Button className="w-full justify-start" variant="outline">
-                <Users className="mr-2 h-4 w-4" />
-                Manage Users
-              </Button>
-              <Button className="w-full justify-start" variant="outline">
-                <Building2 className="mr-2 h-4 w-4" />
-                Manage Departments
-              </Button>
-              <Button className="w-full justify-start" variant="outline">
-                <GraduationCap className="mr-2 h-4 w-4" />
-                Manage Students
-              </Button>
-              <Button className="w-full justify-start" variant="outline">
-                <BarChart3 className="mr-2 h-4 w-4" />
-                View Reports
-              </Button>
-            </div>
-          </Card>
-        </div>
+        {/* Recent Students */}
+        <Card className={`p-6 ${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'}`}>
+          <h2 className="text-2xl font-bold mb-4">Recently Enrolled Students</h2>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Enrolled Date</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recentStudents.map((student) => (
+                  <TableRow key={student.id}>
+                    <TableCell className="font-medium">{student.name}</TableCell>
+                    <TableCell>{student.email}</TableCell>
+                    <TableCell>{student.department}</TableCell>
+                    <TableCell>{student.enrolled}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

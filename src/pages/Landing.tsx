@@ -136,6 +136,10 @@ const Landing = () => {
               className={`text-lg px-8 ${
                 theme === 'neon' ? 'neon-border' : 'luxe-glow'
               }`}
+              onClick={() => {
+                const featuresSection = document.getElementById('features-section');
+                featuresSection?.scrollIntoView({ behavior: 'smooth' });
+              }}
             >
               Learn More
             </Button>
@@ -144,7 +148,7 @@ const Landing = () => {
       </section>
 
       {/* Features Grid */}
-      <section className="relative z-10 container mx-auto px-4 py-20">
+      <section id="features-section" className="relative z-10 container mx-auto px-4 py-20">
         <div className="text-center mb-16">
           <h2 className={`text-4xl md:text-5xl font-bold mb-4 ${
             theme === 'neon' ? 'neon-glow' : ''

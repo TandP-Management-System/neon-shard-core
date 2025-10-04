@@ -1,12 +1,19 @@
-import { useAuth } from '@/contexts/AuthContext';
-import { useTheme } from '@/contexts/ThemeContext';
-import { Button } from '@/components/ui/button';
+import DashboardLayout from '@/components/DashboardLayout';
 import { Card } from '@/components/ui/card';
-import ThemeToggle from '@/components/ThemeToggle';
-import { LogOut, BookOpen, Calendar, Award, FileText } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
+import { BookOpen, Calendar, Award, FileText, Briefcase, Bell } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 
 const StudentDashboard = () => {
-  const { user, logout } = useAuth();
   const { theme } = useTheme();
 
   const stats = [
@@ -16,41 +23,32 @@ const StudentDashboard = () => {
     { icon: Calendar, label: 'Upcoming Events', value: '4', color: 'text-primary' },
   ];
 
+  const courses = [
+    { id: 1, name: 'Data Structures', code: 'CS301', instructor: 'Dr. Smith', nextClass: 'Mon 10:00 AM', progress: 85 },
+    { id: 2, name: 'Algorithms', code: 'CS302', instructor: 'Prof. Johnson', nextClass: 'Tue 2:00 PM', progress: 92 },
+    { id: 3, name: 'Database Systems', code: 'CS303', instructor: 'Dr. Williams', nextClass: 'Wed 11:00 AM', progress: 88 },
+    { id: 4, name: 'Web Development', code: 'CS304', instructor: 'Prof. Brown', nextClass: 'Thu 3:00 PM', progress: 76 },
+    { id: 5, name: 'Software Engineering', code: 'CS305', instructor: 'Dr. Davis', nextClass: 'Fri 9:00 AM', progress: 94 },
+  ];
+
+  const enrolledJobs = [
+    { id: 1, title: 'Software Engineer Intern', company: 'TechCorp Inc.', status: 'Applied', appliedDate: '2025-01-15' },
+    { id: 2, title: 'Data Analyst', company: 'DataWorks', status: 'Interview Scheduled', appliedDate: '2025-01-12' },
+    { id: 3, title: 'Web Developer', company: 'Creative Studios', status: 'Under Review', appliedDate: '2025-01-10' },
+  ];
+
+  const notices = [
+    { id: 1, title: 'Mid-term Exam Schedule Released', content: 'Check your course pages for detailed schedules.', date: '2025-01-18', priority: 'high' },
+    { id: 2, title: 'Library Hours Extended', content: 'Library will remain open until 10 PM during exam week.', date: '2025-01-17', priority: 'medium' },
+    { id: 3, title: 'Career Fair Next Month', content: 'Register for the annual career fair featuring 50+ companies.', date: '2025-01-16', priority: 'medium' },
+    { id: 4, title: 'New Study Groups Available', content: 'Join peer study groups for CS courses.', date: '2025-01-15', priority: 'low' },
+  ];
+
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute top-1/4 -left-48 w-96 h-96 rounded-full blur-3xl opacity-10 animate-pulse ${
-          theme === 'neon' ? 'bg-primary' : 'bg-primary'
-        }`} />
-      </div>
-
-      <div className="relative z-10 container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className={`text-4xl font-bold ${theme === 'neon' ? 'neon-glow' : ''}`}>
-              Student Portal
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Welcome back, {user?.name}!
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <Button 
-              onClick={logout}
-              variant="outline"
-              className={theme === 'neon' ? 'neon-border' : 'luxe-glow'}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
-            </Button>
-          </div>
-        </div>
-
+    <DashboardLayout userRole="student">
+      <div className="p-6 space-y-6">
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, index) => {
             const Icon = stat.icon;
             return (
@@ -76,76 +74,102 @@ const StudentDashboard = () => {
           })}
         </div>
 
-        {/* Main Content */}
+        {/* Enrolled Courses */}
+        <Card className={`p-6 ${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'}`}>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold">My Courses</h2>
+            <BookOpen className="w-6 h-6 text-primary" />
+          </div>
+          <div className="space-y-4">
+            {courses.map((course) => (
+              <div key={course.id} className="p-4 rounded-lg bg-background/50 border border-border">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 className="font-semibold text-lg">{course.name}</h3>
+                    <p className="text-sm text-muted-foreground">{course.code} • {course.instructor}</p>
+                  </div>
+                  <Badge variant="outline" className="text-xs">
+                    Next: {course.nextClass}
+                  </Badge>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Course Progress</span>
+                    <span className="font-medium">{course.progress}%</span>
+                  </div>
+                  <Progress value={course.progress} className="h-2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Job Applications & Notices */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className={`p-6 ${
-            theme === 'neon' ? 'glass neon-border' : 'glass-luxe'
-          }`}>
-            <h2 className="text-2xl font-bold mb-4">My Courses</h2>
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-background/50 border border-border">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold">Data Structures</h3>
-                  <span className="text-sm text-primary">CS301</span>
-                </div>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>Next class: Monday 10:00 AM</span>
-                  <span className="text-accent">85%</span>
-                </div>
-              </div>
-              <div className="p-4 rounded-lg bg-background/50 border border-border">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold">Algorithms</h3>
-                  <span className="text-sm text-primary">CS302</span>
-                </div>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>Next class: Tuesday 2:00 PM</span>
-                  <span className="text-accent">92%</span>
-                </div>
-              </div>
-              <div className="p-4 rounded-lg bg-background/50 border border-border">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold">Database Systems</h3>
-                  <span className="text-sm text-primary">CS303</span>
-                </div>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>Next class: Wednesday 11:00 AM</span>
-                  <span className="text-accent">88%</span>
-                </div>
-              </div>
+          {/* Job Applications */}
+          <Card className={`p-6 ${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'}`}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold">Job Applications</h2>
+              <Briefcase className="w-6 h-6 text-primary" />
+            </div>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Position</TableHead>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {enrolledJobs.map((job) => (
+                    <TableRow key={job.id}>
+                      <TableCell className="font-medium">{job.title}</TableCell>
+                      <TableCell>{job.company}</TableCell>
+                      <TableCell>
+                        <Badge variant={
+                          job.status === 'Interview Scheduled' ? 'default' : 
+                          job.status === 'Applied' ? 'secondary' : 
+                          'outline'
+                        }>
+                          {job.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           </Card>
 
-          <Card className={`p-6 ${
-            theme === 'neon' ? 'glass neon-border' : 'glass-luxe'
-          }`}>
-            <h2 className="text-2xl font-bold mb-4">Upcoming Assignments</h2>
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-background/50 border border-border">
-                <h3 className="font-semibold mb-2">Algorithm Analysis</h3>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Due: Tomorrow, 11:59 PM
-                </p>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-primary h-2 rounded-full" style={{ width: '60%' }}></div>
+          {/* Notices */}
+          <Card className={`p-6 ${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'}`}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold">Important Notices</h2>
+              <Bell className="w-6 h-6 text-primary" />
+            </div>
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {notices.map((notice) => (
+                <div key={notice.id} className="p-4 rounded-lg bg-background/50 border border-border">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold text-sm">{notice.title}</h3>
+                    <Badge variant={
+                      notice.priority === 'high' ? 'destructive' : 
+                      notice.priority === 'medium' ? 'default' : 
+                      'secondary'
+                    } className="text-xs">
+                      {notice.priority}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-2">{notice.content}</p>
+                  <p className="text-xs text-muted-foreground">{notice.date}</p>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">60% Complete</p>
-              </div>
-              <div className="p-4 rounded-lg bg-background/50 border border-border">
-                <h3 className="font-semibold mb-2">Database Design Project</h3>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Due: Friday, 11:59 PM
-                </p>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-secondary h-2 rounded-full" style={{ width: '30%' }}></div>
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">30% Complete</p>
-              </div>
+              ))}
             </div>
           </Card>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
