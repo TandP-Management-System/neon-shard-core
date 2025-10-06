@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useTheme } from '@/contexts/ThemeContext';
+import logo from '../assets/logo.png'; 
 import { 
   Zap, 
   Shield, 
@@ -72,7 +73,13 @@ const Landing = () => {
             <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
               theme === 'neon' ? 'bg-primary/20 neon-border' : 'bg-primary/20 luxe-glow'
             }`}>
-              <Sparkles className="w-6 h-6 text-primary" />
+              {/*<Sparkles className="w-6 h-6 text-primary" />*/}
+              <img
+          src={logo}
+          alt="Logo"
+          className="w-6 h-6 object-contain"
+        />
+
             </div>
             <span className={`text-2xl font-bold ${theme === 'neon' ? 'neon-glow' : ''}`}>
               AJS-Hub

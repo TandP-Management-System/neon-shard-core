@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import ThemeToggle from '@/components/ThemeToggle';
 import { Sparkles, LogIn, AlertCircle } from 'lucide-react';
+import logo from '../assets/logo.png';
 import { toast } from 'sonner';
 
 const Login = () => {
@@ -81,7 +82,13 @@ const Login = () => {
           <div className={`w-16 h-16 rounded-xl flex items-center justify-center mb-4 ${
             theme === 'neon' ? 'bg-primary/20 neon-border' : 'bg-primary/20 luxe-glow'
           }`}>
-            <Sparkles className="w-8 h-8 text-primary" />
+            {/*<Sparkles className="w-8 h-8 text-primary" />*/}
+            <img
+          src={logo}
+          alt="Logo"
+          className="w-6 h-6 object-contain"
+        />
+
           </div>
           <h1 className={`text-3xl font-bold ${theme === 'neon' ? 'neon-glow' : ''}`}>
             Welcome Back

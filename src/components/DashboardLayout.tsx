@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import ThemeToggle from '@/components/ThemeToggle';
+import logo from '../assets/logo.png';
 import { 
   LogOut, 
   LayoutDashboard,
@@ -84,13 +85,23 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
               AJS-Hub
             </h2>
           )}
-          {sidebarCollapsed && (
+          {/*{sidebarCollapsed && (
             <div className={`w-10 h-10 rounded-lg flex items-center justify-center mx-auto ${
               theme === 'neon' ? 'bg-primary/20 neon-border' : 'bg-primary/20 luxe-glow'
             }`}>
               <LayoutDashboard className="w-6 h-6 text-primary" />
             </div>
-          )}
+          )}*/}
+
+          {sidebarCollapsed && (
+  <div
+    className={`w-10 h-10 rounded-lg flex items-center justify-center mx-auto ${
+      theme === 'neon' ? 'bg-primary/20 neon-border' : 'bg-primary/20 luxe-glow'
+    }`}
+  >
+    <img src={logo} alt="Logo" className="w-6 h-6 object-contain" />
+  </div>
+)}
         </div>
 
         {/* Navigation */}
