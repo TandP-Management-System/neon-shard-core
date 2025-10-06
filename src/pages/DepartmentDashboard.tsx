@@ -1,7 +1,13 @@
+import { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useTheme } from '@/contexts/ThemeContext';
-import { GraduationCap, Users, FileText, Calendar, Briefcase, Bell } from 'lucide-react';
+import { GraduationCap, Users, FileText, Calendar, Briefcase, Bell, Plus } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -11,40 +17,312 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 const DepartmentDashboard = () => {
   const { theme } = useTheme();
+  const { toast } = useToast();
+
+  const [jobPostings, setJobPostings] = useState([
+    { id: 1, title: 'Software Engineer Intern', company: 'TechCorp Inc.', type: 'Internship', applications: 45, deadline: '2025-02-15', eligibility: ['10th Math > 75%', '12th CS > 80%'] },
+    { id: 2, title: 'Data Analyst', company: 'DataWorks', type: 'Full-time', applications: 32, deadline: '2025-02-20', eligibility: ['12th Math > 85%', 'Degree in Stats'] },
+    { id: 3, title: 'Web Developer', company: 'Creative Studios', type: 'Part-time', applications: 28, deadline: '2025-02-18', eligibility: ['12th CS > 70%'] },
+  ]);
+
+  const [meetings, setMeetings] = useState([
+    { id: 1, title: 'Faculty Meeting', date: '2025-01-20', time: '2:00 PM', location: 'Conference Room A', attendees: 18 },
+    { id: 2, title: 'Curriculum Review', date: '2025-01-22', time: '10:00 AM', location: 'Board Room', attendees: 12 },
+    { id: 3, title: 'Student Council', date: '2025-01-24', time: '4:00 PM', location: 'Meeting Hall', attendees: 25 },
+  ]);
+
+  const [announcements, setAnnouncements] = useState([
+    { id: 1, title: 'Mid-term Examinations', content: 'Scheduled for next week. Please ensure all students are prepared.', date: '2025-01-18', priority: 'high' },
+    { id: 2, title: 'Guest Lecture Series', content: 'Industry experts will be visiting next month for special lectures.', date: '2025-01-16', priority: 'medium' },
+    { id: 3, title: 'Lab Equipment Upgrade', content: 'New equipment has been installed in Lab 3. Training sessions scheduled.', date: '2025-01-14', priority: 'low' },
+  ]);
+
+  const [jobDialogOpen, setJobDialogOpen] = useState(false);
+  const [meetingDialogOpen, setMeetingDialogOpen] = useState(false);
+  const [noticeDialogOpen, setNoticeDialogOpen] = useState(false);
+
+  const [newJob, setNewJob] = useState({
+    title: '',
+    company: '',
+    type: 'Internship',
+    deadline: '',
+    eligibility: {
+      tenthMath: false,
+      twelfthMath: false,
+      twelfthCS: false,
+      degree: false,
+    }
+  });
+
+  const [newMeeting, setNewMeeting] = useState({
+    title: '',
+    date: '',
+    time: '',
+    location: '',
+  });
+
+  const [newNotice, setNewNotice] = useState({
+    title: '',
+    content: '',
+    priority: 'medium',
+  });
 
   const stats = [
     { icon: GraduationCap, label: 'Total Students', value: '245', color: 'text-primary' },
     { icon: Users, label: 'Faculty Members', value: '24', color: 'text-secondary' },
     { icon: FileText, label: 'Active Courses', value: '32', color: 'text-accent' },
-    { icon: Briefcase, label: 'Job Postings', value: '8', color: 'text-primary' },
+    { icon: Briefcase, label: 'Job Postings', value: jobPostings.length.toString(), color: 'text-primary' },
   ];
 
-  const jobPostings = [
-    { id: 1, title: 'Software Engineer Intern', company: 'TechCorp Inc.', type: 'Internship', applications: 45, deadline: '2025-02-15' },
-    { id: 2, title: 'Data Analyst', company: 'DataWorks', type: 'Full-time', applications: 32, deadline: '2025-02-20' },
-    { id: 3, title: 'Web Developer', company: 'Creative Studios', type: 'Part-time', applications: 28, deadline: '2025-02-18' },
-    { id: 4, title: 'Research Assistant', company: 'University Lab', type: 'Internship', applications: 19, deadline: '2025-02-25' },
-  ];
+  const handlePostJob = () => {
+    if (!newJob.title || !newJob.company || !newJob.deadline) {
+      toast({ title: 'Error', description: 'Please fill all required fields', variant: 'destructive' });
+      return;
+    }
 
-  const meetings = [
-    { id: 1, title: 'Faculty Meeting', date: '2025-01-20', time: '2:00 PM', location: 'Conference Room A', attendees: 18 },
-    { id: 2, title: 'Curriculum Review', date: '2025-01-22', time: '10:00 AM', location: 'Board Room', attendees: 12 },
-    { id: 3, title: 'Student Council', date: '2025-01-24', time: '4:00 PM', location: 'Meeting Hall', attendees: 25 },
-    { id: 4, title: 'Department Head Meeting', date: '2025-01-26', time: '11:00 AM', location: 'Admin Building', attendees: 8 },
-  ];
+    const eligibilityList = [];
+    if (newJob.eligibility.tenthMath) eligibilityList.push('10th Math > 75%');
+    if (newJob.eligibility.twelfthMath) eligibilityList.push('12th Math > 85%');
+    if (newJob.eligibility.twelfthCS) eligibilityList.push('12th CS > 80%');
+    if (newJob.eligibility.degree) eligibilityList.push('Degree Required');
 
-  const announcements = [
-    { id: 1, title: 'Mid-term Examinations', content: 'Scheduled for next week. Please ensure all students are prepared.', date: '2025-01-18', priority: 'high' },
-    { id: 2, title: 'Guest Lecture Series', content: 'Industry experts will be visiting next month for special lectures.', date: '2025-01-16', priority: 'medium' },
-    { id: 3, title: 'Lab Equipment Upgrade', content: 'New equipment has been installed in Lab 3. Training sessions scheduled.', date: '2025-01-14', priority: 'low' },
-  ];
+    const job = {
+      id: jobPostings.length + 1,
+      title: newJob.title,
+      company: newJob.company,
+      type: newJob.type,
+      deadline: newJob.deadline,
+      applications: 0,
+      eligibility: eligibilityList,
+    };
+
+    setJobPostings([...jobPostings, job]);
+    setNewJob({ title: '', company: '', type: 'Internship', deadline: '', eligibility: { tenthMath: false, twelfthMath: false, twelfthCS: false, degree: false } });
+    setJobDialogOpen(false);
+    toast({ title: 'Success', description: 'Job posted successfully' });
+  };
+
+  const handlePostMeeting = () => {
+    if (!newMeeting.title || !newMeeting.date || !newMeeting.time || !newMeeting.location) {
+      toast({ title: 'Error', description: 'Please fill all fields', variant: 'destructive' });
+      return;
+    }
+
+    const meeting = {
+      id: meetings.length + 1,
+      ...newMeeting,
+      attendees: 0,
+    };
+
+    setMeetings([...meetings, meeting]);
+    setNewMeeting({ title: '', date: '', time: '', location: '' });
+    setMeetingDialogOpen(false);
+    toast({ title: 'Success', description: 'Meeting scheduled successfully' });
+  };
+
+  const handlePostNotice = () => {
+    if (!newNotice.title || !newNotice.content) {
+      toast({ title: 'Error', description: 'Please fill all fields', variant: 'destructive' });
+      return;
+    }
+
+    const notice = {
+      id: announcements.length + 1,
+      ...newNotice,
+      date: new Date().toISOString().split('T')[0],
+    };
+
+    setAnnouncements([notice, ...announcements]);
+    setNewNotice({ title: '', content: '', priority: 'medium' });
+    setNoticeDialogOpen(false);
+    toast({ title: 'Success', description: 'Notice posted successfully' });
+  };
 
   return (
     <DashboardLayout userRole="department">
       <div className="p-6 space-y-6">
+        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-4">
+          <Dialog open={jobDialogOpen} onOpenChange={setJobDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className={theme === 'neon' ? 'neon-glow' : ''}>
+                <Plus className="w-4 h-4 mr-2" />
+                Post Job
+              </Button>
+            </DialogTrigger>
+            <DialogContent className={`${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'} max-h-[90vh] overflow-y-auto`}>
+              <DialogHeader>
+                <DialogTitle>Post New Job</DialogTitle>
+                <DialogDescription>Create a job posting with eligibility criteria</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="job-title">Job Title</Label>
+                  <Input id="job-title" value={newJob.title} onChange={(e) => setNewJob({...newJob, title: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="job-company">Company</Label>
+                  <Input id="job-company" value={newJob.company} onChange={(e) => setNewJob({...newJob, company: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="job-type">Job Type</Label>
+                  <Select value={newJob.type} onValueChange={(value) => setNewJob({...newJob, type: value})}>
+                    <SelectTrigger id="job-type">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Internship">Internship</SelectItem>
+                      <SelectItem value="Full-time">Full-time</SelectItem>
+                      <SelectItem value="Part-time">Part-time</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="job-deadline">Application Deadline</Label>
+                  <Input id="job-deadline" type="date" value={newJob.deadline} onChange={(e) => setNewJob({...newJob, deadline: e.target.value})} />
+                </div>
+                <div>
+                  <Label>Eligibility Criteria</Label>
+                  <div className="space-y-2 mt-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="tenth-math"
+                        checked={newJob.eligibility.tenthMath}
+                        onCheckedChange={(checked) => setNewJob({...newJob, eligibility: {...newJob.eligibility, tenthMath: checked as boolean}})}
+                      />
+                      <label htmlFor="tenth-math" className="text-sm cursor-pointer">10th Math &gt; 75%</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="twelfth-math"
+                        checked={newJob.eligibility.twelfthMath}
+                        onCheckedChange={(checked) => setNewJob({...newJob, eligibility: {...newJob.eligibility, twelfthMath: checked as boolean}})}
+                      />
+                      <label htmlFor="twelfth-math" className="text-sm cursor-pointer">12th Math &gt; 85%</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="twelfth-cs"
+                        checked={newJob.eligibility.twelfthCS}
+                        onCheckedChange={(checked) => setNewJob({...newJob, eligibility: {...newJob.eligibility, twelfthCS: checked as boolean}})}
+                      />
+                      <label htmlFor="twelfth-cs" className="text-sm cursor-pointer">12th CS &gt; 80%</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="degree"
+                        checked={newJob.eligibility.degree}
+                        onCheckedChange={(checked) => setNewJob({...newJob, eligibility: {...newJob.eligibility, degree: checked as boolean}})}
+                      />
+                      <label htmlFor="degree" className="text-sm cursor-pointer">Degree Required</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={handlePostJob}>Post Job</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={meetingDialogOpen} onOpenChange={setMeetingDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className={theme === 'neon' ? 'neon-glow' : ''}>
+                <Plus className="w-4 h-4 mr-2" />
+                Schedule Meeting
+              </Button>
+            </DialogTrigger>
+            <DialogContent className={theme === 'neon' ? 'glass neon-border' : 'glass-luxe'}>
+              <DialogHeader>
+                <DialogTitle>Schedule Meeting</DialogTitle>
+                <DialogDescription>Add a new meeting to the calendar</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="meeting-title">Meeting Title</Label>
+                  <Input id="meeting-title" value={newMeeting.title} onChange={(e) => setNewMeeting({...newMeeting, title: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="meeting-date">Date</Label>
+                  <Input id="meeting-date" type="date" value={newMeeting.date} onChange={(e) => setNewMeeting({...newMeeting, date: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="meeting-time">Time</Label>
+                  <Input id="meeting-time" type="time" value={newMeeting.time} onChange={(e) => setNewMeeting({...newMeeting, time: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="meeting-location">Location</Label>
+                  <Input id="meeting-location" value={newMeeting.location} onChange={(e) => setNewMeeting({...newMeeting, location: e.target.value})} />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={handlePostMeeting}>Schedule Meeting</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog open={noticeDialogOpen} onOpenChange={setNoticeDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className={theme === 'neon' ? 'neon-glow' : ''}>
+                <Plus className="w-4 h-4 mr-2" />
+                Post Notice
+              </Button>
+            </DialogTrigger>
+            <DialogContent className={theme === 'neon' ? 'glass neon-border' : 'glass-luxe'}>
+              <DialogHeader>
+                <DialogTitle>Post Notice</DialogTitle>
+                <DialogDescription>Create a new announcement</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="notice-title">Notice Title</Label>
+                  <Input id="notice-title" value={newNotice.title} onChange={(e) => setNewNotice({...newNotice, title: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="notice-content">Content</Label>
+                  <Textarea id="notice-content" value={newNotice.content} onChange={(e) => setNewNotice({...newNotice, content: e.target.value})} rows={4} />
+                </div>
+                <div>
+                  <Label htmlFor="notice-priority">Priority</Label>
+                  <Select value={newNotice.priority} onValueChange={(value) => setNewNotice({...newNotice, priority: value})}>
+                    <SelectTrigger id="notice-priority">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={handlePostNotice}>Post Notice</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, index) => {
@@ -85,6 +363,7 @@ const DepartmentDashboard = () => {
                   <TableHead>Position</TableHead>
                   <TableHead>Company</TableHead>
                   <TableHead>Type</TableHead>
+                  <TableHead>Eligibility</TableHead>
                   <TableHead>Applications</TableHead>
                   <TableHead>Deadline</TableHead>
                 </TableRow>
@@ -98,6 +377,15 @@ const DepartmentDashboard = () => {
                       <Badge variant={job.type === 'Full-time' ? 'default' : 'secondary'}>
                         {job.type}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {job.eligibility.map((criteria, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs">
+                            {criteria}
+                          </Badge>
+                        ))}
+                      </div>
                     </TableCell>
                     <TableCell>{job.applications}</TableCell>
                     <TableCell>{job.deadline}</TableCell>
