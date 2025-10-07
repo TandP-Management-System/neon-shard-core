@@ -53,6 +53,7 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
           { icon: Calendar, label: 'Meetings', path: '/department/meetings' },
           { icon: FileText, label: 'Courses', path: '/department/courses' },
           { icon: Bell, label: 'Announcements', path: '/department/announcements' },
+          { icon: Settings, label: 'Settings', path: '/department/settings' },
         ];
       case 'student':
         return [
@@ -62,6 +63,7 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
           { icon: FileText, label: 'Assignments', path: '/student/assignments' },
           { icon: Award, label: 'Grades', path: '/student/grades' },
           { icon: Bell, label: 'Notices', path: '/student/notices' },
+          { icon: Settings, label: 'Settings', path: '/student/settings' },
         ];
     }
   };
