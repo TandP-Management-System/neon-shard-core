@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Button } from '@/components/ui/button';
 import ThemeToggle from '@/components/ThemeToggle';
+import NotificationCenter from '@/components/NotificationCenter';
 import logo from '../assets/logo.png';
 import { 
   LogOut, 
@@ -162,6 +163,7 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
             </p>
           </div>
           <div className="flex items-center gap-4">
+            <NotificationCenter />
             <ThemeToggle />
             <Button 
               onClick={logout}

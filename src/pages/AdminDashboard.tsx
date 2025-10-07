@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useData } from '@/contexts/DataContext';
 import { Users, Building2, GraduationCap, BarChart3, TrendingUp, Upload, Plus, Edit, Trash2, Briefcase } from 'lucide-react';
 import {
   Table,
@@ -29,41 +30,20 @@ import { useToast } from '@/hooks/use-toast';
 const AdminDashboard = () => {
   const { theme } = useTheme();
   const { toast } = useToast();
-
-  const [departments, setDepartments] = useState([
-    { id: 1, name: 'Computer Science', students: 245, faculty: 24, head: 'Dr. Sarah Johnson' },
-    { id: 2, name: 'Mathematics', students: 198, faculty: 18, head: 'Prof. Michael Chen' },
-    { id: 3, name: 'Physics', students: 167, faculty: 16, head: 'Dr. Emily Davis' },
-    { id: 4, name: 'Chemistry', students: 189, faculty: 20, head: 'Prof. Robert Brown' },
-    { id: 5, name: 'Biology', students: 156, faculty: 15, head: 'Dr. Lisa Anderson' },
-  ]);
-
-  const [recentStudents, setRecentStudents] = useState([
-    { id: 1, name: 'John Doe', email: 'john.doe@university.edu', department: 'Computer Science', enrolled: '2025-01-15' },
-    { id: 2, name: 'Jane Smith', email: 'jane.smith@university.edu', department: 'Mathematics', enrolled: '2025-01-14' },
-    { id: 3, name: 'Mike Johnson', email: 'mike.j@university.edu', department: 'Physics', enrolled: '2025-01-14' },
-    { id: 4, name: 'Sarah Williams', email: 'sarah.w@university.edu', department: 'Chemistry', enrolled: '2025-01-13' },
-    { id: 5, name: 'David Lee', email: 'david.lee@university.edu', department: 'Biology', enrolled: '2025-01-13' },
-  ]);
-
-  const [jobs, setJobs] = useState([
-    { id: 1, title: 'Software Developer Internship', company: 'TechCorp', department: 'Computer Science', salary: '$50k', status: 'Active' },
-    { id: 2, title: 'Data Analyst', company: 'DataWorks', department: 'Mathematics', salary: '$45k', status: 'Active' },
-    { id: 3, title: 'Research Assistant', company: 'QuantumLabs', department: 'Physics', salary: '$40k', status: 'Active' },
-  ]);
+  const { departments, students, jobs, addDepartment, updateDepartment, deleteDepartment, addJob, addStudent } = useData();
 
   const [deptDialogOpen, setDeptDialogOpen] = useState(false);
   const [jobDialogOpen, setJobDialogOpen] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [editingDept, setEditingDept] = useState<any>(null);
 
-  const [newDept, setNewDept] = useState({ name: '', head: '', faculty: 0 });
-  const [newJob, setNewJob] = useState({ title: '', company: '', department: '', salary: '' });
+  const [newDept, setNewDept] = useState({ name: '', head: '', students: 0 });
+  const [newJob, setNewJob] = useState({ title: '', company: '', type: 'Internship', department: '', deadline: '', eligibility: [] as string[] });
 
   const stats = [
-    { icon: Users, label: 'Total Users', value: '1,234', change: '+12%', color: 'text-primary' },
+    { icon: Users, label: 'Total Users', value: (departments.length + students.length).toString(), change: '+12%', color: 'text-primary' },
     { icon: Building2, label: 'Departments', value: departments.length.toString(), change: '+2', color: 'text-secondary' },
-    { icon: GraduationCap, label: 'Students', value: recentStudents.length.toString(), change: '+45', color: 'text-accent' },
+    { icon: GraduationCap, label: 'Students', value: students.length.toString(), change: '+45', color: 'text-accent' },
     { icon: Briefcase, label: 'Active Jobs', value: jobs.length.toString(), change: '+5', color: 'text-primary' },
   ];
 
@@ -72,43 +52,31 @@ const AdminDashboard = () => {
       toast({ title: 'Error', description: 'Please fill all fields', variant: 'destructive' });
       return;
     }
-    const dept = {
-      id: departments.length + 1,
-      name: newDept.name,
-      head: newDept.head,
-      faculty: newDept.faculty,
-      students: 0,
-    };
-    setDepartments([...departments, dept]);
-    setNewDept({ name: '', head: '', faculty: 0 });
+    addDepartment(newDept);
+    setNewDept({ name: '', head: '', students: 0 });
     setDeptDialogOpen(false);
     toast({ title: 'Success', description: 'Department added successfully' });
   };
 
   const handleEditDepartment = () => {
-    setDepartments(departments.map(d => d.id === editingDept.id ? editingDept : d));
+    updateDepartment(editingDept.id, editingDept);
     setEditingDept(null);
     setDeptDialogOpen(false);
     toast({ title: 'Success', description: 'Department updated successfully' });
   };
 
-  const handleDeleteDepartment = (id: number) => {
-    setDepartments(departments.filter(d => d.id !== id));
+  const handleDeleteDepartment = (id: string) => {
+    deleteDepartment(id);
     toast({ title: 'Success', description: 'Department deleted successfully' });
   };
 
   const handleAddJob = () => {
-    if (!newJob.title || !newJob.company || !newJob.department) {
+    if (!newJob.title || !newJob.company || !newJob.department || !newJob.deadline) {
       toast({ title: 'Error', description: 'Please fill all fields', variant: 'destructive' });
       return;
     }
-    const job = {
-      id: jobs.length + 1,
-      ...newJob,
-      status: 'Active',
-    };
-    setJobs([...jobs, job]);
-    setNewJob({ title: '', company: '', department: '', salary: '' });
+    addJob({ ...newJob, applicants: 0 });
+    setNewJob({ title: '', company: '', type: 'Internship', department: '', deadline: '', eligibility: [] });
     setJobDialogOpen(false);
     toast({ title: 'Success', description: 'Job posted successfully' });
   };
@@ -119,10 +87,10 @@ const AdminDashboard = () => {
     
     // Simulate CSV parsing
     const mockStudents = [
-      { id: recentStudents.length + 1, name: 'Alice Brown', email: 'alice.b@university.edu', department: 'Computer Science', enrolled: new Date().toISOString().split('T')[0] },
-      { id: recentStudents.length + 2, name: 'Bob Wilson', email: 'bob.w@university.edu', department: 'Mathematics', enrolled: new Date().toISOString().split('T')[0] },
+      { name: 'Alice Brown', email: 'alice.b@university.edu', department: 'Computer Science', enrolledJobs: 0 },
+      { name: 'Bob Wilson', email: 'bob.w@university.edu', department: 'Mathematics', enrolledJobs: 0 },
     ];
-    setRecentStudents([...mockStudents, ...recentStudents]);
+    mockStudents.forEach(s => addStudent(s));
     setUploadDialogOpen(false);
     toast({ title: 'Success', description: `Uploaded ${mockStudents.length} students from CSV` });
   };
@@ -155,7 +123,7 @@ const AdminDashboard = () => {
 
           <Dialog open={deptDialogOpen} onOpenChange={setDeptDialogOpen}>
             <DialogTrigger asChild>
-              <Button className={theme === 'neon' ? 'neon-glow' : ''} onClick={() => { setEditingDept(null); setNewDept({ name: '', head: '', faculty: 0 }); }}>
+              <Button className={theme === 'neon' ? 'neon-glow' : ''} onClick={() => { setEditingDept(null); setNewDept({ name: '', head: '', students: 0 }); }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Department
               </Button>
@@ -183,12 +151,12 @@ const AdminDashboard = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="dept-faculty">Faculty Count</Label>
+                  <Label htmlFor="dept-students">Initial Student Count</Label>
                   <Input
-                    id="dept-faculty"
+                    id="dept-students"
                     type="number"
-                    value={editingDept ? editingDept.faculty : newDept.faculty}
-                    onChange={(e) => editingDept ? setEditingDept({...editingDept, faculty: parseInt(e.target.value)}) : setNewDept({...newDept, faculty: parseInt(e.target.value)})}
+                    value={editingDept ? editingDept.students : newDept.students}
+                    onChange={(e) => editingDept ? setEditingDept({...editingDept, students: parseInt(e.target.value)}) : setNewDept({...newDept, students: parseInt(e.target.value)})}
                   />
                 </div>
               </div>
@@ -226,8 +194,8 @@ const AdminDashboard = () => {
                   <Input id="job-dept" value={newJob.department} onChange={(e) => setNewJob({...newJob, department: e.target.value})} />
                 </div>
                 <div>
-                  <Label htmlFor="job-salary">Salary</Label>
-                  <Input id="job-salary" value={newJob.salary} onChange={(e) => setNewJob({...newJob, salary: e.target.value})} />
+                  <Label htmlFor="job-deadline">Deadline</Label>
+                  <Input id="job-deadline" type="date" value={newJob.deadline} onChange={(e) => setNewJob({...newJob, deadline: e.target.value})} />
                 </div>
               </div>
               <DialogFooter>
@@ -281,7 +249,6 @@ const AdminDashboard = () => {
                 <TableRow>
                   <TableHead>Department</TableHead>
                   <TableHead>Students</TableHead>
-                  <TableHead>Faculty</TableHead>
                   <TableHead>Department Head</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -291,7 +258,6 @@ const AdminDashboard = () => {
                   <TableRow key={dept.id}>
                     <TableCell className="font-medium">{dept.name}</TableCell>
                     <TableCell>{dept.students}</TableCell>
-                    <TableCell>{dept.faculty}</TableCell>
                     <TableCell>{dept.head}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
@@ -328,8 +294,8 @@ const AdminDashboard = () => {
                   <TableHead>Job Title</TableHead>
                   <TableHead>Company</TableHead>
                   <TableHead>Department</TableHead>
-                  <TableHead>Salary</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Applicants</TableHead>
+                  <TableHead>Deadline</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -338,12 +304,8 @@ const AdminDashboard = () => {
                     <TableCell className="font-medium">{job.title}</TableCell>
                     <TableCell>{job.company}</TableCell>
                     <TableCell>{job.department}</TableCell>
-                    <TableCell>{job.salary}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs ${theme === 'neon' ? 'bg-primary/20 text-primary' : 'bg-primary/20 text-primary'}`}>
-                        {job.status}
-                      </span>
-                    </TableCell>
+                    <TableCell>{job.applicants}</TableCell>
+                    <TableCell>{job.deadline}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -361,16 +323,16 @@ const AdminDashboard = () => {
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Department</TableHead>
-                  <TableHead>Enrolled Date</TableHead>
+                  <TableHead>Enrollments</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentStudents.map((student) => (
+                {students.slice(0, 5).map((student) => (
                   <TableRow key={student.id}>
                     <TableCell className="font-medium">{student.name}</TableCell>
                     <TableCell>{student.email}</TableCell>
                     <TableCell>{student.department}</TableCell>
-                    <TableCell>{student.enrolled}</TableCell>
+                    <TableCell>{student.enrolledJobs} jobs</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

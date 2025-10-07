@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useData } from '@/contexts/DataContext';
 import { GraduationCap, Users, FileText, Calendar, Briefcase, Bell, Plus } from 'lucide-react';
 import {
   Table,
@@ -38,24 +39,7 @@ import { useToast } from '@/hooks/use-toast';
 const DepartmentDashboard = () => {
   const { theme } = useTheme();
   const { toast } = useToast();
-
-  const [jobPostings, setJobPostings] = useState([
-    { id: 1, title: 'Software Engineer Intern', company: 'TechCorp Inc.', type: 'Internship', applications: 45, deadline: '2025-02-15', eligibility: ['10th Math > 75%', '12th CS > 80%'] },
-    { id: 2, title: 'Data Analyst', company: 'DataWorks', type: 'Full-time', applications: 32, deadline: '2025-02-20', eligibility: ['12th Math > 85%', 'Degree in Stats'] },
-    { id: 3, title: 'Web Developer', company: 'Creative Studios', type: 'Part-time', applications: 28, deadline: '2025-02-18', eligibility: ['12th CS > 70%'] },
-  ]);
-
-  const [meetings, setMeetings] = useState([
-    { id: 1, title: 'Faculty Meeting', date: '2025-01-20', time: '2:00 PM', location: 'Conference Room A', attendees: 18 },
-    { id: 2, title: 'Curriculum Review', date: '2025-01-22', time: '10:00 AM', location: 'Board Room', attendees: 12 },
-    { id: 3, title: 'Student Council', date: '2025-01-24', time: '4:00 PM', location: 'Meeting Hall', attendees: 25 },
-  ]);
-
-  const [announcements, setAnnouncements] = useState([
-    { id: 1, title: 'Mid-term Examinations', content: 'Scheduled for next week. Please ensure all students are prepared.', date: '2025-01-18', priority: 'high' },
-    { id: 2, title: 'Guest Lecture Series', content: 'Industry experts will be visiting next month for special lectures.', date: '2025-01-16', priority: 'medium' },
-    { id: 3, title: 'Lab Equipment Upgrade', content: 'New equipment has been installed in Lab 3. Training sessions scheduled.', date: '2025-01-14', priority: 'low' },
-  ]);
+  const { jobs, meetings, announcements, students, addJob, addMeeting, addAnnouncement } = useData();
 
   const [jobDialogOpen, setJobDialogOpen] = useState(false);
   const [meetingDialogOpen, setMeetingDialogOpen] = useState(false);
@@ -88,10 +72,10 @@ const DepartmentDashboard = () => {
   });
 
   const stats = [
-    { icon: GraduationCap, label: 'Total Students', value: '245', color: 'text-primary' },
+    { icon: GraduationCap, label: 'Total Students', value: students.length.toString(), color: 'text-primary' },
     { icon: Users, label: 'Faculty Members', value: '24', color: 'text-secondary' },
     { icon: FileText, label: 'Active Courses', value: '32', color: 'text-accent' },
-    { icon: Briefcase, label: 'Job Postings', value: jobPostings.length.toString(), color: 'text-primary' },
+    { icon: Briefcase, label: 'Job Postings', value: jobs.length.toString(), color: 'text-primary' },
   ];
 
   const handlePostJob = () => {
@@ -106,17 +90,16 @@ const DepartmentDashboard = () => {
     if (newJob.eligibility.twelfthCS) eligibilityList.push('12th CS > 80%');
     if (newJob.eligibility.degree) eligibilityList.push('Degree Required');
 
-    const job = {
-      id: jobPostings.length + 1,
+    addJob({
       title: newJob.title,
       company: newJob.company,
       type: newJob.type,
       deadline: newJob.deadline,
-      applications: 0,
+      department: 'Department',
+      applicants: 0,
       eligibility: eligibilityList,
-    };
+    });
 
-    setJobPostings([...jobPostings, job]);
     setNewJob({ title: '', company: '', type: 'Internship', deadline: '', eligibility: { tenthMath: false, twelfthMath: false, twelfthCS: false, degree: false } });
     setJobDialogOpen(false);
     toast({ title: 'Success', description: 'Job posted successfully' });
@@ -128,13 +111,11 @@ const DepartmentDashboard = () => {
       return;
     }
 
-    const meeting = {
-      id: meetings.length + 1,
+    addMeeting({
       ...newMeeting,
       attendees: 0,
-    };
+    });
 
-    setMeetings([...meetings, meeting]);
     setNewMeeting({ title: '', date: '', time: '', location: '' });
     setMeetingDialogOpen(false);
     toast({ title: 'Success', description: 'Meeting scheduled successfully' });
@@ -146,13 +127,12 @@ const DepartmentDashboard = () => {
       return;
     }
 
-    const notice = {
-      id: announcements.length + 1,
+    addAnnouncement({
       ...newNotice,
       date: new Date().toISOString().split('T')[0],
-    };
+      priority: newNotice.priority as 'high' | 'medium' | 'low',
+    });
 
-    setAnnouncements([notice, ...announcements]);
     setNewNotice({ title: '', content: '', priority: 'medium' });
     setNoticeDialogOpen(false);
     toast({ title: 'Success', description: 'Notice posted successfully' });
@@ -369,7 +349,7 @@ const DepartmentDashboard = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {jobPostings.map((job) => (
+                {jobs.map((job) => (
                   <TableRow key={job.id}>
                     <TableCell className="font-medium">{job.title}</TableCell>
                     <TableCell>{job.company}</TableCell>
@@ -387,7 +367,7 @@ const DepartmentDashboard = () => {
                         ))}
                       </div>
                     </TableCell>
-                    <TableCell>{job.applications}</TableCell>
+                    <TableCell>{job.applicants}</TableCell>
                     <TableCell>{job.deadline}</TableCell>
                   </TableRow>
                 ))}
