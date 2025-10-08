@@ -48,11 +48,24 @@ export interface Announcement {
   priority: 'high' | 'medium' | 'low';
 }
 
+export interface College {
+  id: string;
+  name: string;
+  code: string;
+  domain: string;
+  contact: string;
+  plan: 'Standard' | 'Premium' | 'Enterprise';
+  status: 'Active' | 'Inactive';
+  departments: number;
+  students: number;
+  jobs: number;
+}
+
 export interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'job' | 'meeting' | 'announcement' | 'enrollment';
+  type: 'job' | 'meeting' | 'announcement' | 'enrollment' | 'college';
   timestamp: string;
   read: boolean;
 }
@@ -64,6 +77,7 @@ interface DataContextType {
   meetings: Meeting[];
   announcements: Announcement[];
   notifications: Notification[];
+  colleges: College[];
   addDepartment: (dept: Omit<Department, 'id'>) => void;
   updateDepartment: (id: string, dept: Partial<Department>) => void;
   deleteDepartment: (id: string) => void;
@@ -75,6 +89,9 @@ interface DataContextType {
   addNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void;
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
+  addCollege: (college: Omit<College, 'id'>) => void;
+  updateCollege: (id: string, college: Partial<College>) => void;
+  deleteCollege: (id: string) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -191,6 +208,45 @@ const initialAnnouncements: Announcement[] = [
   },
 ];
 
+const initialColleges: College[] = [
+  {
+    id: '1',
+    name: 'XYZ Institute of Technology',
+    code: 'XYZ-001',
+    domain: 'xyz.edu.in',
+    contact: 'tpo@xyz.edu.in',
+    plan: 'Premium',
+    status: 'Active',
+    departments: 5,
+    students: 450,
+    jobs: 12,
+  },
+  {
+    id: '2',
+    name: 'ABC College of Engineering',
+    code: 'ABC-002',
+    domain: 'abc.edu.in',
+    contact: 'placement@abc.edu.in',
+    plan: 'Standard',
+    status: 'Inactive',
+    departments: 3,
+    students: 280,
+    jobs: 8,
+  },
+  {
+    id: '3',
+    name: 'Global Institute',
+    code: 'GLB-003',
+    domain: 'global.edu.in',
+    contact: 'tp@global.edu.in',
+    plan: 'Enterprise',
+    status: 'Active',
+    departments: 6,
+    students: 620,
+    jobs: 18,
+  },
+];
+
 const initialNotifications: Notification[] = [
   {
     id: '1',
@@ -225,6 +281,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [meetings, setMeetings] = useState<Meeting[]>(initialMeetings);
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
+  const [colleges, setColleges] = useState<College[]>(initialColleges);
 
   const addDepartment = (dept: Omit<Department, 'id'>) => {
     const newDept = { ...dept, id: Date.now().toString() };
@@ -311,6 +368,37 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setNotifications(notifications.map(n => ({ ...n, read: true })));
   };
 
+  const addCollege = (college: Omit<College, 'id'>) => {
+    const newCollege = { ...college, id: Date.now().toString() };
+    setColleges([...colleges, newCollege]);
+    addNotification({
+      title: 'College Added',
+      message: `${college.name} has been registered`,
+      type: 'college',
+    });
+  };
+
+  const updateCollege = (id: string, updates: Partial<College>) => {
+    setColleges(colleges.map(c => (c.id === id ? { ...c, ...updates } : c)));
+    addNotification({
+      title: 'College Updated',
+      message: 'College information has been updated',
+      type: 'college',
+    });
+  };
+
+  const deleteCollege = (id: string) => {
+    const college = colleges.find(c => c.id === id);
+    setColleges(colleges.filter(c => c.id !== id));
+    if (college) {
+      addNotification({
+        title: 'College Removed',
+        message: `${college.name} has been removed`,
+        type: 'college',
+      });
+    }
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -320,6 +408,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         meetings,
         announcements,
         notifications,
+        colleges,
         addDepartment,
         updateDepartment,
         deleteDepartment,
@@ -331,6 +420,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         addNotification,
         markNotificationRead,
         markAllNotificationsRead,
+        addCollege,
+        updateCollege,
+        deleteCollege,
       }}
     >
       {children}

@@ -12,6 +12,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import DepartmentDashboard from "./pages/DepartmentDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import Settings from "./pages/Settings";
+import CollegeManagement from "./pages/CollegeManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,14 @@ const App = () => (
                 element={
                   <ProtectedRoute allowedRoles={['student']}>
                     <StudentDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/colleges" 
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <CollegeManagement />
                   </ProtectedRoute>
                 } 
               />
