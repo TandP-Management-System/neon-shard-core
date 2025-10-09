@@ -61,13 +61,32 @@ export interface College {
   jobs: number;
 }
 
+export interface DepartmentDetail {
+  id: string;
+  collegeId: string;
+  name: string;
+  hod: string;
+  email: string;
+  phone?: string;
+  students: number;
+  activeJobs: number;
+  status: 'Active' | 'Inactive';
+}
+
 export interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'job' | 'meeting' | 'announcement' | 'enrollment' | 'college';
+  type: 'job' | 'meeting' | 'announcement' | 'enrollment' | 'college' | 'department';
   timestamp: string;
   read: boolean;
+}
+
+export interface Analytics {
+  placementsByCollege: { college: string; placed: number }[];
+  topDepartments: { name: string; percentage: number }[];
+  jobDrives: number[];
+  studentGrowth: number[];
 }
 
 interface DataContextType {
@@ -78,6 +97,8 @@ interface DataContextType {
   announcements: Announcement[];
   notifications: Notification[];
   colleges: College[];
+  departmentDetails: DepartmentDetail[];
+  analytics: Analytics;
   addDepartment: (dept: Omit<Department, 'id'>) => void;
   updateDepartment: (id: string, dept: Partial<Department>) => void;
   deleteDepartment: (id: string) => void;
@@ -92,6 +113,9 @@ interface DataContextType {
   addCollege: (college: Omit<College, 'id'>) => void;
   updateCollege: (id: string, college: Partial<College>) => void;
   deleteCollege: (id: string) => void;
+  addDepartmentDetail: (dept: Omit<DepartmentDetail, 'id'>) => void;
+  updateDepartmentDetail: (id: string, dept: Partial<DepartmentDetail>) => void;
+  deleteDepartmentDetail: (id: string) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -247,6 +271,81 @@ const initialColleges: College[] = [
   },
 ];
 
+const initialDepartmentDetails: DepartmentDetail[] = [
+  { 
+    id: '1', 
+    collegeId: '1', 
+    name: 'Computer Science', 
+    hod: 'Dr. Meera Patel', 
+    email: 'hod.cse@xyz.edu.in', 
+    phone: '+91-9876543210',
+    students: 120, 
+    activeJobs: 4, 
+    status: 'Active' 
+  },
+  { 
+    id: '2', 
+    collegeId: '1', 
+    name: 'Electronics', 
+    hod: 'Dr. Anil Singh', 
+    email: 'hod.ece@xyz.edu.in', 
+    phone: '+91-9876543211',
+    students: 80, 
+    activeJobs: 2, 
+    status: 'Active' 
+  },
+  { 
+    id: '3', 
+    collegeId: '2', 
+    name: 'Mechanical', 
+    hod: 'Dr. S. Rao', 
+    email: 'hod.mech@abc.edu.in', 
+    phone: '+91-9876543212',
+    students: 90, 
+    activeJobs: 1, 
+    status: 'Inactive' 
+  },
+  { 
+    id: '4', 
+    collegeId: '3', 
+    name: 'Information Technology', 
+    hod: 'Dr. Priya Sharma', 
+    email: 'hod.it@global.edu.in', 
+    phone: '+91-9876543213',
+    students: 150, 
+    activeJobs: 5, 
+    status: 'Active' 
+  },
+  { 
+    id: '5', 
+    collegeId: '2', 
+    name: 'Civil Engineering', 
+    hod: 'Dr. Rajesh Kumar', 
+    email: 'hod.civil@abc.edu.in', 
+    phone: '+91-9876543214',
+    students: 70, 
+    activeJobs: 2, 
+    status: 'Active' 
+  },
+];
+
+const initialAnalytics: Analytics = {
+  placementsByCollege: [
+    { college: 'XYZ Institute of Technology', placed: 240 },
+    { college: 'ABC College of Engineering', placed: 120 },
+    { college: 'Global Institute', placed: 300 }
+  ],
+  topDepartments: [
+    { name: 'CSE', percentage: 35 },
+    { name: 'ECE', percentage: 25 },
+    { name: 'Mechanical', percentage: 20 },
+    { name: 'Civil', percentage: 10 },
+    { name: 'IT', percentage: 10 }
+  ],
+  jobDrives: [10, 12, 14, 9, 15, 18, 16, 20],
+  studentGrowth: [200, 250, 310, 350, 420, 500, 580]
+};
+
 const initialNotifications: Notification[] = [
   {
     id: '1',
@@ -282,6 +381,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
   const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
   const [colleges, setColleges] = useState<College[]>(initialColleges);
+  const [departmentDetails, setDepartmentDetails] = useState<DepartmentDetail[]>(initialDepartmentDetails);
+  const [analytics] = useState<Analytics>(initialAnalytics);
 
   const addDepartment = (dept: Omit<Department, 'id'>) => {
     const newDept = { ...dept, id: Date.now().toString() };
@@ -399,6 +500,37 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const addDepartmentDetail = (dept: Omit<DepartmentDetail, 'id'>) => {
+    const newDept = { ...dept, id: Date.now().toString() };
+    setDepartmentDetails([...departmentDetails, newDept]);
+    addNotification({
+      title: 'Department Added',
+      message: `${dept.name} department has been created`,
+      type: 'department',
+    });
+  };
+
+  const updateDepartmentDetail = (id: string, updates: Partial<DepartmentDetail>) => {
+    setDepartmentDetails(departmentDetails.map(d => (d.id === id ? { ...d, ...updates } : d)));
+    addNotification({
+      title: 'Department Updated',
+      message: 'Department information has been updated',
+      type: 'department',
+    });
+  };
+
+  const deleteDepartmentDetail = (id: string) => {
+    const dept = departmentDetails.find(d => d.id === id);
+    setDepartmentDetails(departmentDetails.filter(d => d.id !== id));
+    if (dept) {
+      addNotification({
+        title: 'Department Removed',
+        message: `${dept.name} has been removed`,
+        type: 'department',
+      });
+    }
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -409,6 +541,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         announcements,
         notifications,
         colleges,
+        departmentDetails,
+        analytics,
         addDepartment,
         updateDepartment,
         deleteDepartment,
@@ -423,6 +557,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         addCollege,
         updateCollege,
         deleteCollege,
+        addDepartmentDetail,
+        updateDepartmentDetail,
+        deleteDepartmentDetail,
       }}
     >
       {children}

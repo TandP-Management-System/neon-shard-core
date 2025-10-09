@@ -13,6 +13,9 @@ import DepartmentDashboard from "./pages/DepartmentDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
 import Settings from "./pages/Settings";
 import CollegeManagement from "./pages/CollegeManagement";
+import DepartmentManagement from "./pages/DepartmentManagement";
+import DepartmentDetail from "./pages/DepartmentDetail";
+import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -57,6 +60,30 @@ const App = () => (
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <CollegeManagement />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/departments" 
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <DepartmentManagement />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/departments/:id" 
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <DepartmentDetail />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/reports" 
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <Reports />
                   </ProtectedRoute>
                 } 
               />
