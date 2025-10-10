@@ -44,7 +44,7 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
           { icon: Building2, label: 'Colleges', path: '/admin/colleges' },
           { icon: Users, label: 'Departments', path: '/admin/departments' },
           { icon: Briefcase, label: 'Reports', path: '/admin/reports' },
-          { icon: FileText, label: 'Audit Logs', path: '/admin/audit' },
+          { icon: FileText, label: 'Audit Logs', path: '/admin/logs' },
           { icon: Settings, label: 'Settings', path: '/admin/settings' },
         ];
       case 'department':

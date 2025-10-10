@@ -16,6 +16,7 @@ import CollegeManagement from "./pages/CollegeManagement";
 import DepartmentManagement from "./pages/DepartmentManagement";
 import DepartmentDetail from "./pages/DepartmentDetail";
 import Reports from "./pages/Reports";
+import AuditLogs from "./pages/AuditLogs";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -84,6 +85,14 @@ const App = () => (
                 element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <Reports />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/admin/logs" 
+                element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <AuditLogs />
                   </ProtectedRoute>
                 } 
               />

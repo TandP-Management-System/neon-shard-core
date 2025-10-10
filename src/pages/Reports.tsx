@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import DashboardLayout from '@/components/DashboardLayout';
+import Breadcrumb from '@/components/Breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -71,8 +73,11 @@ const Reports = () => {
   }));
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-start">
+    <DashboardLayout userRole="admin">
+      <div className="p-6 space-y-6">
+        <Breadcrumb />
+        
+        <div className="flex justify-between items-start">
         <div>
           <h1 className="text-4xl font-bold mb-2">Reports & Analytics</h1>
           <p className="text-muted-foreground">
@@ -254,7 +259,8 @@ const Reports = () => {
           </ResponsiveContainer>
         </Card>
       </div>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

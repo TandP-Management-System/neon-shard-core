@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useData } from '@/contexts/DataContext';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@/contexts/ThemeContext';
+import DashboardLayout from '@/components/DashboardLayout';
+import Breadcrumb from '@/components/Breadcrumb';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -96,8 +98,11 @@ const DepartmentManagement = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <DashboardLayout userRole="admin">
+      <div className="p-6 space-y-6">
+        <Breadcrumb />
+        
+        <div className="flex justify-between items-center">
         <div>
           <h1 className="text-4xl font-bold mb-2">Department Management</h1>
           <p className="text-muted-foreground">Manage departments across all colleges</p>
@@ -278,7 +283,8 @@ const DepartmentManagement = () => {
           </Table>
         </div>
       </Card>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 };
 

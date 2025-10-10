@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
+import Breadcrumb from '@/components/Breadcrumb';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -113,6 +114,8 @@ const CollegeManagement = () => {
   return (
     <DashboardLayout userRole="admin">
       <div className="p-6 space-y-6">
+        <Breadcrumb />
+        
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
