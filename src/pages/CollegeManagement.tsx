@@ -113,7 +113,7 @@ const CollegeManagement = () => {
 
   return (
     <DashboardLayout userRole="admin">
-      <div className="p-6 space-y-6">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         <Breadcrumb />
         
         {/* Header */}

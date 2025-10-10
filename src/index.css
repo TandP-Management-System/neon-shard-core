@@ -8,47 +8,47 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Futuristic Neon Theme */
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    /* Futuristic Neon Theme (LIGHT) */
+    --background: 0 0% 99%;
+    --foreground: 222.2 84% 4.9%;
 
-    --card: 240 10% 6%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
 
-    --popover: 240 10% 6%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 186 100% 50%;
-    --primary-foreground: 240 10% 3.9%;
+    --primary: 186 100% 45%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 300 100% 50%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 300 100% 46%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 240 10% 12%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 271 91% 65%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 271 91% 55%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 10% 15%;
-    --input: 240 10% 12%;
-    --ring: 186 100% 50%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 186 100% 45%;
 
     --radius: 0.75rem;
 
     /* Neon glow colors */
-    --neon-cyan: 186 100% 50%;
-    --neon-magenta: 300 100% 50%;
-    --neon-purple: 271 91% 65%;
-    --neon-blue: 217 91% 60%;
+    --neon-cyan: 186 100% 45%;
+    --neon-magenta: 300 100% 46%;
+    --neon-purple: 271 91% 55%;
+    --neon-blue: 217 91% 55%;
 
     /* Gradient stops */
-    --gradient-start: 186 100% 50%;
-    --gradient-mid: 271 91% 65%;
-    --gradient-end: 300 100% 50%;
+    --gradient-start: 186 100% 45%;
+    --gradient-mid: 271 91% 55%;
+    --gradient-end: 300 100% 46%;
   }
 
   .theme-luxe {
@@ -101,11 +101,22 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
+  /* Fade up animation */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-fade-up { animation: fade-up 0.6s ease-out both; }
+  .animate-fade-up-slow { animation: fade-up 0.9s ease-out both; }
+  .will-change-transform { will-change: transform; }
+
   .glass {
-    @apply backdrop-blur-xl bg-white/5 border border-white/10 transition-all duration-300;
+    /* Light glass */
+    @apply backdrop-blur-xl bg-white/60 border border-black/5 transition-all duration-300;
   }
 
   .glass-luxe {
+    /* Dark glass */
     @apply backdrop-blur-xl bg-white/[0.03] border border-primary/20 transition-all duration-300;
   }
 

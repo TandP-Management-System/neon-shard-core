@@ -4,6 +4,7 @@ type Theme = 'neon' | 'luxe';
 
 interface ThemeContextType {
   theme: Theme;
+  isDark: boolean;
   toggleTheme: () => void;
 }
 
@@ -17,11 +18,9 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'luxe') {
-      root.classList.add('theme-luxe');
-    } else {
-      root.classList.remove('theme-luxe');
-    }
+    const isDark = theme === 'luxe';
+    root.classList.toggle('theme-luxe', isDark);
+    root.classList.toggle('dark', isDark);
     localStorage.setItem('theme', theme);
   }, [theme]);
 
@@ -30,7 +29,7 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, isDark: theme === 'luxe', toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );

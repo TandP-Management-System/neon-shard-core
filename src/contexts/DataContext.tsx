@@ -110,6 +110,7 @@ interface DataContextType {
   addNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void;
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
+  clearAllNotifications: () => void;
   addCollege: (college: Omit<College, 'id'>) => void;
   updateCollege: (id: string, college: Partial<College>) => void;
   deleteCollege: (id: string) => void;
@@ -469,6 +470,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setNotifications(notifications.map(n => ({ ...n, read: true })));
   };
 
+  const clearAllNotifications = () => {
+    setNotifications([]);
+  };
+
   const addCollege = (college: Omit<College, 'id'>) => {
     const newCollege = { ...college, id: Date.now().toString() };
     setColleges([...colleges, newCollege]);
@@ -554,6 +559,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         addNotification,
         markNotificationRead,
         markAllNotificationsRead,
+        clearAllNotifications,
         addCollege,
         updateCollege,
         deleteCollege,

@@ -10,6 +10,12 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import AdminDashboard from "./pages/AdminDashboard";
 import DepartmentDashboard from "./pages/DepartmentDashboard";
+import DepartmentStudents from "./pages/DepartmentStudents";
+import DepartmentJobs from "./pages/DepartmentJobs";
+import DepartmentMeetings from "./pages/DepartmentMeetings";
+import DepartmentEvents from "./pages/DepartmentEvents";
+import DepartmentCourses from "./pages/DepartmentCourses";
+import DepartmentAnnouncements from "./pages/DepartmentAnnouncements";
 import StudentDashboard from "./pages/StudentDashboard";
 import Settings from "./pages/Settings";
 import CollegeManagement from "./pages/CollegeManagement";
@@ -45,6 +51,46 @@ const App = () => (
                 element={
                   <ProtectedRoute allowedRoles={['department']}>
                     <DepartmentDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/department/students" 
+                element={
+                  <ProtectedRoute allowedRoles={['department']}>
+                    <DepartmentStudents />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/department/jobs" 
+                element={
+                  <ProtectedRoute allowedRoles={['department']}>
+                    <DepartmentJobs />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/department/events" 
+                element={
+                  <ProtectedRoute allowedRoles={['department']}>
+                    <DepartmentEvents />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/department/courses" 
+                element={
+                  <ProtectedRoute allowedRoles={['department']}>
+                    <DepartmentCourses />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/department/announcements" 
+                element={
+                  <ProtectedRoute allowedRoles={['department']}>
+                    <DepartmentAnnouncements />
                   </ProtectedRoute>
                 } 
               />

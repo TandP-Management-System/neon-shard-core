@@ -42,39 +42,88 @@ const Reports = () => {
   const COLORS = ['#00f3ff', '#ff00ff', '#00ff88', '#ffaa00', '#ff3366'];
 
   const handleGeneratePDF = () => {
-    toast.success('Generating PDF report...', {
-      description: 'Your report will be ready in a moment',
-    });
-    setTimeout(() => {
-      toast.success('Report generated successfully');
-    }, 2000);
+    // Simple client-side print to PDF using browser dialog
+    toast.success('Opening print dialog for PDF...');
+    setTimeout(() => window.print(), 300);
   };
 
   const handleDownloadCSV = () => {
-    toast.success('Downloading CSV report...');
+    const rows = [
+      ['Metric','Value'],
+      ...placementData.map((r) => [`Placements - ${r.college}`, String(r.placed)]),
+      ...departmentData.map((d) => [`Dept % - ${d.name}`, String(d.percentage)]),
+      ...jobDrivesData.map((d) => [`Drives - ${d.month}`, String(d.drives)]),
+      ...studentGrowthData.map((d) => [`Students - ${d.month}`, String(d.students)]),
+    ];
+    const csv = rows.map(r => r.map(v => `"${v.replace?.(/"/g, '""') || v}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `reports-${yearFilter}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
-  // Prepare data for charts
-  const placementData = analytics.placementsByCollege;
-  
-  const departmentData = analytics.topDepartments.map((dept, index) => ({
-    ...dept,
-    fill: COLORS[index % COLORS.length],
+  // Prepare data for charts (reactive to filters)
+  // Colleges filter
+  const filteredColleges = collegeFilter === 'all' 
+    ? colleges 
+    : colleges.filter((c) => c.id === collegeFilter);
+
+  // Departments filter (scoped by college if selected)
+  const filteredDepartments = departmentDetails.filter((d) => {
+    const matchesCollege = collegeFilter === 'all' || d.collegeId === collegeFilter;
+    const matchesDept = deptFilter === 'all' || d.id === deptFilter;
+    return matchesCollege && matchesDept;
+  });
+
+  // Bar: Placements by College (demo: use students as proxy for placed)
+  const placementData = filteredColleges.map((c) => ({
+    college: c.name,
+    placed: c.students,
   }));
 
-  const jobDrivesData = analytics.jobDrives.map((count, index) => ({
+  // Pie: Top Departments (demo: use students per department to compute percentage)
+  const totalDeptStudents = filteredDepartments.reduce((sum, d) => sum + d.students, 0) || 1;
+  const departmentAgg = filteredDepartments.map((d) => ({ name: d.name, students: d.students }));
+  const departmentData = departmentAgg
+    .map((d) => ({ name: d.name, percentage: Math.round((d.students / totalDeptStudents) * 100) }))
+    .sort((a, b) => b.percentage - a.percentage)
+    .slice(0, 5)
+    .map((dept, index) => ({ ...dept, fill: COLORS[index % COLORS.length] }));
+
+  // Line/Area: generate reactive demo series influenced by filters and year
+  const seed = `${yearFilter}-${collegeFilter}-${deptFilter}`;
+  function seededRandomSequence(length: number, base: number, variance: number) {
+    let h = 2166136261;
+    for (let i = 0; i < seed.length; i++) h = (h ^ seed.charCodeAt(i)) * 16777619;
+    const rand = () => {
+      // xorshift32
+      h ^= h << 13; h ^= h >>> 17; h ^= h << 5;
+      return ((h >>> 0) % 1000) / 1000;
+    };
+    return Array.from({ length }, (_, i) => Math.max(0, Math.round(base + (rand() - 0.5) * variance)));
+  }
+
+  const drivesSeries = seededRandomSequence(12, 12, 12);
+  const studentsSeries = seededRandomSequence(12, 300, 200).map((v, i, arr) => i === 0 ? v : Math.max(v, arr[i-1]));
+
+  const jobDrivesData = drivesSeries.map((count, index) => ({
     month: `Month ${index + 1}`,
     drives: count,
   }));
 
-  const studentGrowthData = analytics.studentGrowth.map((count, index) => ({
+  const studentGrowthData = studentsSeries.map((count, index) => ({
     month: `Month ${index + 1}`,
     students: count,
   }));
 
   return (
     <DashboardLayout userRole="admin">
-      <div className="p-6 space-y-6">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         <Breadcrumb />
         
         <div className="flex justify-between items-start">

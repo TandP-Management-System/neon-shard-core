@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useTheme } from '@/contexts/ThemeContext';
 import logo from '../assets/logo.png'; 
@@ -98,7 +101,7 @@ const Landing = () => {
 
       {/* Hero Section */}
       <section className="relative z-10 container mx-auto px-4 py-20 md:py-32">
-        <div className="text-center max-w-4xl mx-auto">
+        <div className="text-center max-w-4xl mx-auto animate-fade-up will-change-transform">
           <div className="inline-block mb-6">
             <span className={`px-4 py-2 rounded-full text-sm font-medium ${
               theme === 'neon' 
@@ -109,12 +112,10 @@ const Landing = () => {
             </span>
           </div>
           
-          <h1 className={`text-5xl md:text-7xl font-bold mb-6 ${
-            theme === 'neon' ? 'neon-glow' : ''
-          }`}>
-            Transform Your
+          <h1 className={`text-5xl md:text-7xl font-bold mb-6 leading-tight`}>
+            <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">Transform</span> Your
             <br />
-            Digital Experience
+            <span className={theme === 'neon' ? 'neon-glow' : ''}>Digital Experience</span>
           </h1>
           
           <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto">
@@ -149,10 +150,22 @@ const Landing = () => {
               Learn More
             </Button>
           </div>
+
+          {/* Trust logos / social proof */}
+          <div className="mt-12 opacity-90">
+            <div className="text-sm text-muted-foreground mb-4">Trusted by teams at</div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6 items-center">
+              {['NeonLabs','LuxeCorp','AJS-Tech','CyberWave','EduGrid','NovaWorks'].map((brand) => (
+                <div key={brand} className={`h-10 flex items-center justify-center rounded-md ${theme === 'neon' ? 'glass' : 'glass-luxe'}`}>
+                  <span className="text-xs md:text-sm font-medium">{brand}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Features Grid */}
+      {/* Features Grid with tabs */}
       <section id="features-section" className="relative z-10 container mx-auto px-4 py-20">
         <div className="text-center mb-16">
           <h2 className={`text-4xl md:text-5xl font-bold mb-4 ${
@@ -165,29 +178,123 @@ const Landing = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
-            return (
-              <Card
-                key={index}
-                className={`p-6 transition-all duration-300 hover:scale-105 ${
-                  theme === 'neon' 
-                    ? 'glass neon-border hover:shadow-[0_0_30px_rgba(0,243,255,0.3)]' 
-                    : 'glass-luxe hover:shadow-[0_0_30px_rgba(255,215,0,0.2)]'
-                }`}
-              >
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${
-                  theme === 'neon' ? 'bg-primary/20' : 'bg-primary/20'
-                }`}>
-                  <Icon className="w-6 h-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.description}</p>
-              </Card>
-            );
-          })}
+        <Tabs defaultValue="analytics" className="w-full mb-10">
+          <TabsList className="grid grid-cols-3 max-w-xl mx-auto">
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="automation">Automation</TabsTrigger>
+            <TabsTrigger value="security">Security</TabsTrigger>
+          </TabsList>
+          <TabsContent value="analytics">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {features.slice(0, 3).map((feature, index) => {
+                const Icon = feature.icon;
+                return (
+                  <Card key={index} className={`${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'} p-6 transition-all duration-300 hover:scale-[1.02] animate-fade-up`} style={{ animationDelay: `${index * 80}ms` }}>
+                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${theme === 'neon' ? 'bg-primary/20' : 'bg-primary/20'}`}>
+                      <Icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                    <p className="text-muted-foreground">{feature.description}</p>
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+          <TabsContent value="automation">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {features.slice(3, 6).map((feature, index) => {
+                const Icon = feature.icon;
+                return (
+                  <Card key={index} className={`${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'} p-6 transition-all duration-300 hover:scale-[1.02] animate-fade-up`} style={{ animationDelay: `${index * 80}ms` }}>
+                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${theme === 'neon' ? 'bg-primary/20' : 'bg-primary/20'}`}>
+                      <Icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                    <p className="text-muted-foreground">{feature.description}</p>
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+          <TabsContent value="security">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[features[1], features[5], features[2]].map((feature, index) => {
+                const Icon = feature.icon;
+                return (
+                  <Card key={index} className={`${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'} p-6 transition-all duration-300 hover:scale-[1.02] animate-fade-up`} style={{ animationDelay: `${index * 80}ms` }}>
+                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${theme === 'neon' ? 'bg-primary/20' : 'bg-primary/20'}`}>
+                      <Icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                    <p className="text-muted-foreground">{feature.description}</p>
+                  </Card>
+                );
+              })}
+            </div>
+          </TabsContent>
+        </Tabs>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { k: 'Colleges', v: '120+' },
+            { k: 'Departments', v: '450+' },
+            { k: 'Students', v: '25k+' },
+            { k: 'Placements', v: '9.2k' },
+          ].map((s) => (
+            <Card key={s.k} className={`${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'} p-4 text-center animate-fade-up`}>
+              <div className="text-2xl font-bold text-primary">{s.v}</div>
+              <div className="text-sm text-muted-foreground">{s.k}</div>
+            </Card>
+          ))}
         </div>
+      </section>
+
+      {/* Testimonials Carousel */}
+      <section className="relative z-10 container mx-auto px-4 py-20">
+        <div className="text-center mb-10">
+          <h2 className={`text-3xl md:text-4xl font-bold ${theme === 'neon' ? 'neon-glow' : ''}`}>What our customers say</h2>
+          <p className="text-muted-foreground">Real stories from teams using AJS-Hub</p>
+        </div>
+        <Carousel className="max-w-4xl mx-auto animate-fade-up-slow">
+          <CarouselContent>
+            {[
+              { n: 'Priya S.', r: '“We onboarded 6 colleges in a week. The analytics are gold.”' },
+              { n: 'Ravi K.', r: '“Best T&P ops dashboard I’ve used. Students love the flow.”' },
+              { n: 'Aisha M.', r: '“Scheduling and placements tracking became effortless.”' },
+            ].map((t, i) => (
+              <CarouselItem key={i} className="basis-full">
+                <Card className={`${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'} p-8 text-center`}>
+                  <p className="text-xl mb-4">{t.r}</p>
+                  <div className="text-sm text-muted-foreground">{t.n}</div>
+                </Card>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
+      </section>
+
+      {/* FAQ */}
+      <section className="relative z-10 container mx-auto px-4 py-20 animate-fade-up">
+        <div className="text-center mb-10">
+          <h2 className={`text-3xl md:text-4xl font-bold ${theme === 'neon' ? 'neon-glow' : ''}`}>Frequently asked questions</h2>
+        </div>
+        <Accordion type="single" collapsible className="max-w-3xl mx-auto">
+          <AccordionItem value="item-1">
+            <AccordionTrigger>How fast can we get started?</AccordionTrigger>
+            <AccordionContent>Instantly. Use the demo data today, connect your backend later.</AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-2">
+            <AccordionTrigger>Is our data secure?</AccordionTrigger>
+            <AccordionContent>Yes. Role-based access, encrypted storage, and audit logs (demo now).</AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="item-3">
+            <AccordionTrigger>Can we customize branding?</AccordionTrigger>
+            <AccordionContent>Absolutely. Set platform name, logo, and theme in Settings.</AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </section>
 
       {/* CTA Section */}

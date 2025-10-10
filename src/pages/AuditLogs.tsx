@@ -28,7 +28,7 @@ import { format } from 'date-fns';
 
 const AuditLogs = () => {
   const { theme } = useTheme();
-  const { notifications } = useData();
+  const { notifications, clearAllNotifications } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -59,6 +59,7 @@ const AuditLogs = () => {
   );
 
   const handleClearLogs = () => {
+    clearAllNotifications();
     toast.success('Logs cleared successfully', {
       description: 'All audit logs have been cleared from the system',
     });
@@ -78,7 +79,7 @@ const AuditLogs = () => {
 
   return (
     <DashboardLayout userRole="admin">
-      <div className="p-6 space-y-6">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         <Breadcrumb />
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
