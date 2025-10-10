@@ -58,10 +58,10 @@ const DashboardLayout = ({ children, userRole }: DashboardLayoutProps) => {
         ];
       case 'department':
         return [
-          { icon: LayoutDashboard, label: 'Dashboard', path: '/department' },
+          { icon: LayoutDashboard, label: 'Dashboard', path: '/department/dashboard' },
           { icon: GraduationCap, label: 'Students', path: '/department/students' },
           { icon: Briefcase, label: 'Job Postings', path: '/department/jobs' },
-          { icon: Calendar, label: 'Events', path: '/department/events' },
+          { icon: Calendar, label: 'Events & Drives', path: '/department/events' },
           { icon: FileText, label: 'Reports', path: '/department/reports' },
           { icon: Bell, label: 'Announcements', path: '/department/announcements' },
           { icon: Settings, label: 'Settings', path: '/department/settings' },

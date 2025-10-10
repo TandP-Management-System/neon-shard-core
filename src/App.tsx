@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -22,6 +22,7 @@ import CollegeManagement from "./pages/CollegeManagement";
 import DepartmentManagement from "./pages/DepartmentManagement";
 import DepartmentDetail from "./pages/DepartmentDetail";
 import Reports from "./pages/Reports";
+import DepartmentReports from "./pages/DepartmentReports";
 import AuditLogs from "./pages/AuditLogs";
 import NotFound from "./pages/NotFound";
 
@@ -46,11 +47,20 @@ const App = () => (
                   </ProtectedRoute>
                 } 
               />
+              <Route path="/department" element={<Navigate to="/department/dashboard" replace />} />
               <Route 
-                path="/department" 
+                path="/department/dashboard" 
                 element={
                   <ProtectedRoute allowedRoles={['department']}>
                     <DepartmentDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/department/reports" 
+                element={
+                  <ProtectedRoute allowedRoles={['department']}>
+                    <DepartmentReports />
                   </ProtectedRoute>
                 } 
               />

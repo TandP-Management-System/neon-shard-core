@@ -10,14 +10,44 @@ export interface Department {
 
 export interface Student {
   id: string;
+  enrollment_number?: string;
   name: string;
+  phone?: string;
   email: string;
   department: string;
+  branch?: string;
+  cgpa?: number;
+  backlogs?: number;
+  tenthPercent?: number;
+  twelfthPercent?: number;
+  graduationPercent?: number;
+  graduationPeriod?: string;
+  educationGapYears?: number;
+  pastBacklogs?: number;
+  skills?: string[];
+  resumeUrl?: string;
+  blacklisted?: boolean;
   enrolledJobs: number;
   tenthMath?: number;
   twelfthMath?: number;
   twelfthCS?: number;
   hasDegree?: boolean;
+}
+
+export interface CourseEnrollment {
+  studentId: string;
+  progress: number; // 0-100
+  grade?: string; // e.g., A, B, C
+}
+
+export interface Course {
+  id: string;
+  name: string;
+  description: string;
+  durationWeeks: number;
+  skillsCovered: string[];
+  status: 'Active' | 'Inactive' | 'Completed';
+  enrolled: CourseEnrollment[];
 }
 
 export interface Job {
@@ -38,6 +68,53 @@ export interface Meeting {
   time: string;
   location: string;
   attendees: number;
+}
+
+export type EventStatus = 'Upcoming' | 'Ongoing' | 'Completed';
+export type EventType = 'Workshop' | 'Seminar' | 'Hackathon' | 'Training' | 'Webinar';
+
+export interface DepartmentEvent {
+  id: string;
+  title: string;
+  description?: string;
+  type: EventType;
+  date: string; // ISO date
+  time?: string; // HH:mm
+  location?: string;
+  onlineLink?: string;
+  maxParticipants?: number;
+  status: EventStatus;
+  active: boolean;
+  posterUrl?: string;
+  registeredStudents: { studentId: string; status: 'Registered' | 'Attended' | 'No-show' }[];
+}
+
+export type DriveStatus = 'Announced' | 'Open' | 'Closed' | 'Completed';
+
+export interface DriveEligibilityCriteria {
+  minTenth?: number;
+  minTwelfth?: number;
+  minGraduation?: number;
+  gradYearFrom?: number;
+  gradYearTo?: number;
+  maxEducationGapYears?: number;
+  allowActiveBacklog?: boolean;
+  allowPastBacklog?: boolean;
+  requiredSkills?: string[];
+  location?: 'On-Campus' | 'Virtual';
+  resumeRequired?: boolean;
+}
+
+export interface CampusDrive {
+  id: string;
+  company: string;
+  role: string;
+  ctcLpa: number;
+  driveDate: string; // ISO date
+  description?: string;
+  deadline?: string; // ISO date
+  criteria: DriveEligibilityCriteria;
+  status: DriveStatus;
 }
 
 export interface Announcement {
@@ -92,6 +169,9 @@ export interface Analytics {
 interface DataContextType {
   departments: Department[];
   students: Student[];
+  courses: Course[];
+  events: DepartmentEvent[];
+  drives: CampusDrive[];
   jobs: Job[];
   meetings: Meeting[];
   announcements: Announcement[];
@@ -103,10 +183,21 @@ interface DataContextType {
   updateDepartment: (id: string, dept: Partial<Department>) => void;
   deleteDepartment: (id: string) => void;
   addStudent: (student: Omit<Student, 'id'>) => void;
+  updateStudent: (id: string, updates: Partial<Student>) => void;
+  getStudentByEnrollment: (enrollment: string) => Student | undefined;
+  addEvent: (evt: Omit<DepartmentEvent, 'id'>) => void;
+  updateEvent: (id: string, updates: Partial<DepartmentEvent>) => void;
+  deleteEvent: (id: string) => void;
+  addDrive: (drv: Omit<CampusDrive, 'id'>) => void;
+  updateDrive: (id: string, updates: Partial<CampusDrive>) => void;
+  deleteDrive: (id: string) => void;
   addJob: (job: Omit<Job, 'id'>) => void;
   addMeeting: (meeting: Omit<Meeting, 'id'>) => void;
   addAnnouncement: (announcement: Omit<Announcement, 'id'>) => void;
   enrollInJob: (studentId: string, jobId: string) => void;
+  getCourses: () => Course[];
+  upsertCourse: (course: Partial<Course> & { id?: string }) => void;
+  updateCourseProgress: (courseId: string, studentId: string, progress: number, grade?: string) => void;
   addNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void;
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
@@ -129,39 +220,26 @@ const initialDepartments: Department[] = [
 ];
 
 const initialStudents: Student[] = [
-  {
-    id: '1',
-    name: 'John Doe',
-    email: 'student1@saas.com',
-    department: 'Computer Science',
-    enrolledJobs: 2,
-    tenthMath: 85,
-    twelfthMath: 90,
-    twelfthCS: 88,
-    hasDegree: false,
-  },
-  {
-    id: '2',
-    name: 'Jane Smith',
-    email: 'student2@saas.com',
-    department: 'Mathematics',
-    enrolledJobs: 1,
-    tenthMath: 78,
-    twelfthMath: 87,
-    twelfthCS: 82,
-    hasDegree: false,
-  },
-  {
-    id: '3',
-    name: 'Mike Johnson',
-    email: 'student3@saas.com',
-    department: 'Computer Science',
-    enrolledJobs: 3,
-    tenthMath: 92,
-    twelfthMath: 95,
-    twelfthCS: 93,
-    hasDegree: true,
-  },
+  { id: '1', enrollment_number: 'ENG20220045', name: 'Riya Sharma', email: 'riya.sharma@university.edu', phone: '+91-98200-00001', department: 'Computer Science', branch: 'CSE', cgpa: 8.7, tenthPercent: 92, twelfthPercent: 90, graduationPercent: 86, graduationPeriod: '2021-2025', educationGapYears: 0, pastBacklogs: 0, backlogs: 0, skills: ['Python','Data Analysis','SQL'], resumeUrl: 'https://example.com/resume/riya', blacklisted: false, enrolledJobs: 2 },
+  { id: '2', enrollment_number: 'ENG20220046', name: 'Arjun Mehta', email: 'arjun.mehta@university.edu', phone: '+91-98200-00002', department: 'Computer Science', branch: 'CSE', cgpa: 7.9, tenthPercent: 88, twelfthPercent: 85, graduationPercent: 80, graduationPeriod: '2021-2025', educationGapYears: 0, pastBacklogs: 1, backlogs: 1, skills: ['Java','DSA'], resumeUrl: 'https://example.com/resume/arjun', blacklisted: false, enrolledJobs: 1 },
+  { id: '3', enrollment_number: 'ENG20220047', name: 'Neha Verma', email: 'neha.verma@university.edu', phone: '+91-98200-00003', department: 'Computer Science', branch: 'CSE', cgpa: 9.1, tenthPercent: 94, twelfthPercent: 93, graduationPercent: 91, graduationPeriod: '2021-2025', educationGapYears: 0, pastBacklogs: 0, backlogs: 0, skills: ['ML','Python','Pandas'], resumeUrl: 'https://example.com/resume/neha', blacklisted: false, enrolledJobs: 3 },
+  { id: '4', enrollment_number: 'ENG20220048', name: 'Karan Gupta', email: 'karan.gupta@university.edu', phone: '+91-98200-00004', department: 'Computer Science', branch: 'CSE', cgpa: 7.2, tenthPercent: 80, twelfthPercent: 78, graduationPercent: 72, graduationPeriod: '2021-2025', educationGapYears: 1, pastBacklogs: 2, backlogs: 2, skills: ['HTML','CSS'], resumeUrl: 'https://example.com/resume/karan', blacklisted: true, enrolledJobs: 0 },
+  { id: '5', enrollment_number: 'ENG20220049', name: 'Aisha Khan', email: 'aisha.khan@university.edu', phone: '+91-98200-00005', department: 'Information Technology', branch: 'IT', cgpa: 8.3, tenthPercent: 90, twelfthPercent: 88, graduationPercent: 84, graduationPeriod: '2021-2025', educationGapYears: 0, pastBacklogs: 0, backlogs: 0, skills: ['JavaScript','React'], resumeUrl: 'https://example.com/resume/aisha', blacklisted: false, enrolledJobs: 1 },
+  { id: '6', enrollment_number: 'ENR2024IT002', name: 'Rohan Das', email: 'rohan.das@university.edu', department: 'Information Technology', branch: 'IT', cgpa: 7.6, backlogs: 1, blacklisted: false, enrolledJobs: 2 },
+  { id: '7', enrollment_number: 'ENR2024ECE001', name: 'Priya Nair', email: 'priya.nair@university.edu', department: 'Electronics', branch: 'ECE', cgpa: 8.9, backlogs: 0, blacklisted: false, enrolledJobs: 2 },
+  { id: '8', enrollment_number: 'ENR2024ECE002', name: 'Vikram Singh', email: 'vikram.singh@university.edu', department: 'Electronics', branch: 'ECE', cgpa: 7.8, backlogs: 1, blacklisted: false, enrolledJobs: 1 },
+  { id: '9', enrollment_number: 'ENR2024ME001', name: 'Suresh Rao', email: 'suresh.rao@university.edu', department: 'Mechanical', branch: 'ME', cgpa: 7.1, backlogs: 2, blacklisted: false, enrolledJobs: 0 },
+  { id: '10', enrollment_number: 'ENR2024CIV001', name: 'Meera Joshi', email: 'meera.joshi@university.edu', department: 'Civil', branch: 'CE', cgpa: 8.0, backlogs: 0, blacklisted: false, enrolledJobs: 1 },
+  { id: '11', enrollment_number: 'ENR2024CSE005', name: 'Dev Patel', email: 'dev.patel@university.edu', department: 'Computer Science', branch: 'CSE', cgpa: 8.5, backlogs: 0, blacklisted: false, enrolledJobs: 2 },
+  { id: '12', enrollment_number: 'ENR2024CSE006', name: 'Sanya Kapoor', email: 'sanya.kapoor@university.edu', department: 'Computer Science', branch: 'CSE', cgpa: 9.2, backlogs: 0, blacklisted: false, enrolledJobs: 3 },
+  { id: '13', enrollment_number: 'ENR2024CSE007', name: 'Rahul Jain', email: 'rahul.jain@university.edu', department: 'Computer Science', branch: 'CSE', cgpa: 6.9, backlogs: 3, blacklisted: true, enrolledJobs: 0 },
+  { id: '14', enrollment_number: 'ENR2024IT003', name: 'Ananya Roy', email: 'ananya.roy@university.edu', department: 'Information Technology', branch: 'IT', cgpa: 8.1, backlogs: 0, blacklisted: false, enrolledJobs: 1 },
+  { id: '15', enrollment_number: 'ENR2024ECE003', name: 'Harsh Vardhan', email: 'harsh.vardhan@university.edu', department: 'Electronics', branch: 'ECE', cgpa: 7.4, backlogs: 1, blacklisted: false, enrolledJobs: 1 },
+  { id: '16', enrollment_number: 'ENR2024ME002', name: 'Ishita Malhotra', email: 'ishita.malhotra@university.edu', department: 'Mechanical', branch: 'ME', cgpa: 7.7, backlogs: 1, blacklisted: false, enrolledJobs: 1 },
+  { id: '17', enrollment_number: 'ENR2024CIV002', name: 'Tushar Kulkarni', email: 'tushar.kulkarni@university.edu', department: 'Civil', branch: 'CE', cgpa: 7.9, backlogs: 0, blacklisted: false, enrolledJobs: 1 },
+  { id: '18', enrollment_number: 'ENR2024CSE008', name: 'Sneha Iyer', email: 'sneha.iyer@university.edu', department: 'Computer Science', branch: 'CSE', cgpa: 8.8, backlogs: 0, blacklisted: false, enrolledJobs: 2 },
+  { id: '19', enrollment_number: 'ENR2024CSE009', name: 'Manav Kapoor', email: 'manav.kapoor@university.edu', department: 'Computer Science', branch: 'CSE', cgpa: 8.0, backlogs: 0, blacklisted: false, enrolledJobs: 2 },
+  { id: '20', enrollment_number: 'ENR2024IT004', name: 'Zoya Sheikh', email: 'zoya.sheikh@university.edu', department: 'Information Technology', branch: 'IT', cgpa: 8.4, backlogs: 0, blacklisted: false, enrolledJobs: 1 },
 ];
 
 const initialJobs: Job[] = [
@@ -195,6 +273,67 @@ const initialJobs: Job[] = [
     applicants: 12,
     eligibility: ['12th Math > 85%'],
   },
+  {
+    id: '4',
+    title: 'Google SDE',
+    company: 'Google',
+    type: 'Full-time',
+    department: 'Computer Science',
+    deadline: '2025-12-20',
+    applicants: 45,
+    eligibility: ['CGPA > 8.0', 'No active backlogs'],
+  },
+  {
+    id: '5',
+    title: 'TCS Ninja',
+    company: 'TCS',
+    type: 'Full-time',
+    department: 'Information Technology',
+    deadline: '2025-12-15',
+    applicants: 80,
+    eligibility: ['CGPA > 7.0'],
+  },
+];
+
+const initialCourses: Course[] = [
+  {
+    id: 'c1',
+    name: 'Python for Data Science',
+    description: 'Hands-on course covering Python, Pandas, NumPy, and data analysis.',
+    durationWeeks: 8,
+    skillsCovered: ['Python','Pandas','NumPy','Data Analysis'],
+    status: 'Active',
+    enrolled: [
+      { studentId: '1', progress: 85, grade: 'A' },
+      { studentId: '3', progress: 70, grade: 'B+' },
+      { studentId: '5', progress: 60 },
+    ],
+  },
+  {
+    id: 'c2',
+    name: 'Aptitude Training',
+    description: 'Quantitative aptitude, logical reasoning, and verbal ability.',
+    durationWeeks: 6,
+    skillsCovered: ['Quant','LR','Verbal'],
+    status: 'Active',
+    enrolled: [
+      { studentId: '1', progress: 92, grade: 'A+' },
+      { studentId: '2', progress: 68, grade: 'B' },
+      { studentId: '4', progress: 40 },
+    ],
+  },
+  {
+    id: 'c3',
+    name: 'Web Development Basics',
+    description: 'HTML, CSS, JavaScript fundamentals and modern tooling.',
+    durationWeeks: 10,
+    skillsCovered: ['HTML','CSS','JavaScript'],
+    status: 'Inactive',
+    enrolled: [
+      { studentId: '2', progress: 55 },
+      { studentId: '5', progress: 20 },
+    ],
+  },
 ];
 
 const initialMeetings: Meeting[] = [
@@ -213,6 +352,93 @@ const initialMeetings: Meeting[] = [
     time: '2:00 PM',
     location: 'Room 301',
     attendees: 40,
+  },
+  {
+    id: '3',
+    title: 'Resume Workshop',
+    date: '2025-10-25',
+    time: '11:00 AM',
+    location: 'Lab 2',
+    attendees: 35,
+  },
+];
+
+const initialEvents: DepartmentEvent[] = [
+  {
+    id: 'e1',
+    title: 'AI Workshop 2025',
+    description: 'Hands-on session on practical AI applications.',
+    type: 'Workshop',
+    date: '2025-11-10',
+    time: '10:00',
+    location: 'Auditorium',
+    active: true,
+    status: 'Upcoming',
+    posterUrl: '',
+    registeredStudents: [{ studentId: '1', status: 'Registered' }, { studentId: '3', status: 'Registered' }],
+    maxParticipants: 150,
+  },
+  {
+    id: 'e2',
+    title: 'Placement Bootcamp',
+    description: 'Intensive placement readiness program.',
+    type: 'Training',
+    date: '2025-10-20',
+    time: '09:00',
+    location: 'Lab 1',
+    active: true,
+    status: 'Ongoing',
+    registeredStudents: [{ studentId: '2', status: 'Attended' }, { studentId: '5', status: 'Registered' }],
+    maxParticipants: 100,
+  },
+  {
+    id: 'e3',
+    title: 'TechFest 2025',
+    description: 'Annual department tech fest.',
+    type: 'Hackathon',
+    date: '2025-09-15',
+    time: '12:00',
+    onlineLink: 'https://meet.example.com/techfest',
+    active: false,
+    status: 'Completed',
+    registeredStudents: [{ studentId: '4', status: 'No-show' }],
+    maxParticipants: 500,
+  },
+];
+
+const initialDrives: CampusDrive[] = [
+  {
+    id: 'd1',
+    company: 'Infosys',
+    role: 'System Engineer',
+    ctcLpa: 5,
+    driveDate: '2025-12-05',
+    description: 'Infosys SE role for graduating batch.',
+    deadline: '2025-11-25',
+    criteria: { minGraduation: 60, allowActiveBacklog: false, requiredSkills: ['Java','DSA'], location: 'On-Campus', resumeRequired: true },
+    status: 'Announced',
+  },
+  {
+    id: 'd2',
+    company: 'TCS',
+    role: 'Ninja',
+    ctcLpa: 4.5,
+    driveDate: '2025-11-28',
+    description: 'TCS Ninja hiring drive',
+    deadline: '2025-11-18',
+    criteria: { minTenth: 70, minTwelfth: 70, minGraduation: 60, location: 'Virtual' },
+    status: 'Open',
+  },
+  {
+    id: 'd3',
+    company: 'Google',
+    role: 'STEP Internship',
+    ctcLpa: 15,
+    driveDate: '2026-01-15',
+    description: 'Google STEP intern program',
+    deadline: '2025-12-20',
+    criteria: { minGraduation: 80, requiredSkills: ['Python','ML'], location: 'Virtual', resumeRequired: true },
+    status: 'Announced',
   },
 ];
 
@@ -377,6 +603,9 @@ const initialNotifications: Notification[] = [
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [departments, setDepartments] = useState<Department[]>(initialDepartments);
   const [students, setStudents] = useState<Student[]>(initialStudents);
+  const [courses, setCourses] = useState<Course[]>(initialCourses);
+  const [events, setEvents] = useState<DepartmentEvent[]>(initialEvents);
+  const [drives, setDrives] = useState<CampusDrive[]>(initialDrives);
   const [jobs, setJobs] = useState<Job[]>(initialJobs);
   const [meetings, setMeetings] = useState<Meeting[]>(initialMeetings);
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements);
@@ -406,6 +635,14 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const addStudent = (student: Omit<Student, 'id'>) => {
     const newStudent = { ...student, id: Date.now().toString() };
     setStudents([...students, newStudent]);
+  };
+
+  const updateStudent = (id: string, updates: Partial<Student>) => {
+    setStudents(students.map(s => (s.id === id ? { ...s, ...updates } : s)));
+  };
+
+  const getStudentByEnrollment = (enrollment: string) => {
+    return students.find(s => s.enrollment_number?.toLowerCase() === enrollment.toLowerCase());
   };
 
   const addJob = (job: Omit<Job, 'id'>) => {
@@ -438,6 +675,34 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     });
   };
 
+  const addEvent = (evt: Omit<DepartmentEvent, 'id'>) => {
+    const newEvt = { ...evt, id: Date.now().toString() };
+    setEvents([newEvt, ...events]);
+    addNotification({ title: 'Event Created', message: `${evt.title}`, type: 'meeting' });
+  };
+
+  const updateEvent = (id: string, updates: Partial<DepartmentEvent>) => {
+    setEvents(events.map(e => (e.id === id ? { ...e, ...updates } : e)));
+  };
+
+  const deleteEvent = (id: string) => {
+    setEvents(events.filter(e => e.id !== id));
+  };
+
+  const addDrive = (drv: Omit<CampusDrive, 'id'>) => {
+    const newDrv = { ...drv, id: Date.now().toString() };
+    setDrives([newDrv, ...drives]);
+    addNotification({ title: 'Drive Announced', message: `${drv.company} - ${drv.role}`, type: 'job' });
+  };
+
+  const updateDrive = (id: string, updates: Partial<CampusDrive>) => {
+    setDrives(drives.map(d => (d.id === id ? { ...d, ...updates } : d)));
+  };
+
+  const deleteDrive = (id: string) => {
+    setDrives(drives.filter(d => d.id !== id));
+  };
+
   const enrollInJob = (studentId: string, jobId: string) => {
     setStudents(
       students.map(s =>
@@ -460,6 +725,39 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       read: false,
     };
     setNotifications([newNotification, ...notifications]);
+  };
+
+  const getCourses = () => courses;
+
+  const upsertCourse = (course: Partial<Course> & { id?: string }) => {
+    if (course.id) {
+      setCourses(courses.map(c => (c.id === course.id ? { ...c, ...course } as Course : c)));
+      return;
+    }
+    const newCourse: Course = {
+      id: Date.now().toString(),
+      name: course.name || 'New Course',
+      description: course.description || '',
+      durationWeeks: course.durationWeeks || 4,
+      skillsCovered: course.skillsCovered || [],
+      status: course.status || 'Active',
+      enrolled: course.enrolled || [],
+    };
+    setCourses([...courses, newCourse]);
+  };
+
+  const updateCourseProgress = (courseId: string, studentId: string, progress: number, grade?: string) => {
+    setCourses(courses.map(c => {
+      if (c.id !== courseId) return c;
+      const exists = c.enrolled.find(e => e.studentId === studentId);
+      if (exists) {
+        return {
+          ...c,
+          enrolled: c.enrolled.map(e => e.studentId === studentId ? { ...e, progress, grade } : e),
+        };
+      }
+      return { ...c, enrolled: [...c.enrolled, { studentId, progress, grade }] };
+    }));
   };
 
   const markNotificationRead = (id: string) => {
@@ -541,6 +839,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       value={{
         departments,
         students,
+        courses,
+        events,
+        drives,
         jobs,
         meetings,
         announcements,
@@ -552,10 +853,21 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         updateDepartment,
         deleteDepartment,
         addStudent,
+        updateStudent,
+        getStudentByEnrollment,
+        addEvent,
+        updateEvent,
+        deleteEvent,
+        addDrive,
+        updateDrive,
+        deleteDrive,
         addJob,
         addMeeting,
         addAnnouncement,
         enrollInJob,
+        getCourses,
+        upsertCourse,
+        updateCourseProgress,
         addNotification,
         markNotificationRead,
         markAllNotificationsRead,

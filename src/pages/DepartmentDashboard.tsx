@@ -8,7 +8,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useData } from '@/contexts/DataContext';
-import { GraduationCap, Users, FileText, Calendar, Briefcase, Bell, Plus } from 'lucide-react';
+import { GraduationCap, Users, FileText, Calendar, Briefcase, Bell, Plus, AlertTriangle } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip as ReTooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from 'recharts';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
 import {
   Table,
   TableBody,
@@ -71,11 +84,35 @@ const DepartmentDashboard = () => {
     priority: 'medium',
   });
 
+  const blacklistedCount = students.filter(s => s.blacklisted).length;
+  const activeJobs = jobs.length;
+  const ongoingEvents = meetings.length;
+
   const stats = [
     { icon: GraduationCap, label: 'Total Students', value: students.length.toString(), color: 'text-primary' },
-    { icon: Users, label: 'Faculty Members', value: '24', color: 'text-secondary' },
-    { icon: FileText, label: 'Active Courses', value: '32', color: 'text-accent' },
-    { icon: Briefcase, label: 'Job Postings', value: jobs.length.toString(), color: 'text-primary' },
+    { icon: Briefcase, label: 'Active Jobs', value: activeJobs.toString(), color: 'text-secondary' },
+    { icon: Calendar, label: 'Ongoing Events', value: ongoingEvents.toString(), color: 'text-accent' },
+    { icon: AlertTriangle, label: 'Blacklisted Students', value: blacklistedCount.toString(), color: 'text-red-500' },
+  ];
+
+  const applicationsPerJob = [
+    { job: 'Google SDE', count: 45 },
+    { job: 'TCS Ninja', count: 80 },
+    { job: 'Infosys SE', count: 67 },
+  ];
+
+  const placementStatus = [
+    { status: 'Selected', count: 15 },
+    { status: 'Shortlisted', count: 30 },
+    { status: 'Rejected', count: 25 },
+  ];
+
+  const donutColors = ['#10b981', '#6366f1', '#ef4444'];
+
+  const activityFeed = [
+    { id: 'a1', text: 'Job posted: Google SDE Drive', time: '2h ago' },
+    { id: 'a2', text: 'Student blacklisted: ENR2024CSE007', time: '4h ago' },
+    { id: 'a3', text: 'Event created: Resume Workshop', time: '1d ago' },
   ];
 
   const handlePostJob = () => {
@@ -330,7 +367,121 @@ const DepartmentDashboard = () => {
           })}
         </div>
 
-        {/* Job Postings */}
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className={`${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'} p-6 lg:col-span-2`}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold">Student Applications per Job</h2>
+            </div>
+            <ChartContainer
+              config={{ count: { label: 'Applications', color: theme === 'neon' ? '#22d3ee' : '#fbbf24' } }}
+              className="h-72"
+            >
+              <BarChart data={applicationsPerJob}>
+                <XAxis dataKey="job" tickLine={false} axisLine={false} />
+                <YAxis tickLine={false} axisLine={false} />
+                <ReTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="count" fill="var(--color-count)" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ChartContainer>
+          </Card>
+
+          <Card className={`${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'} p-6`}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold">Placement Status</h2>
+            </div>
+            <div className="h-72">
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie data={placementStatus} dataKey="count" nameKey="status" innerRadius={60} outerRadius={90} stroke="transparent">
+                    {placementStatus.map((_, i) => (
+                      <Cell key={i} fill={donutColors[i % donutColors.length]} />
+                    ))}
+                  </Pie>
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        </div>
+
+        {/* Quick Actions & Job Postings */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className={`p-6 ${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'} lg:col-span-1`}>
+            <h2 className="text-2xl font-bold mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button onClick={() => setJobDialogOpen(true)} className={`p-4 rounded-lg transition-all ${theme === 'neon' ? 'glass neon-border hover:shadow-[0_0_25px_rgba(34,211,238,0.4)]' : 'glass-luxe hover:shadow-[0_0_25px_rgba(255,215,0,0.25)]'}`}>
+                <div className="text-left">
+                  <div className="font-semibold">Add New Job</div>
+                  <div className="text-xs text-muted-foreground">Post a new job drive</div>
+                </div>
+              </button>
+              <a href="/department/students" className={`p-4 rounded-lg transition-all ${theme === 'neon' ? 'glass neon-border hover:shadow-[0_0_25px_rgba(34,211,238,0.4)]' : 'glass-luxe hover:shadow-[0_0_25px_rgba(255,215,0,0.25)]'}`}>
+                <div className="text-left">
+                  <div className="font-semibold">View All Students</div>
+                  <div className="text-xs text-muted-foreground">Open student management</div>
+                </div>
+              </a>
+              <button onClick={() => setMeetingDialogOpen(true)} className={`p-4 rounded-lg transition-all ${theme === 'neon' ? 'glass neon-border hover:shadow-[0_0_25px_rgba(34,211,238,0.4)]' : 'glass-luxe hover:shadow-[0_0_25px_rgba(255,215,0,0.25)]'}`}>
+                <div className="text-left">
+                  <div className="font-semibold">Create Event</div>
+                  <div className="text-xs text-muted-foreground">Schedule a meeting or event</div>
+                </div>
+              </button>
+              <a href="/department/reports" className={`p-4 rounded-lg transition-all ${theme === 'neon' ? 'glass neon-border hover:shadow-[0_0_25px_rgba(34,211,238,0.4)]' : 'glass-luxe hover:shadow-[0_0_25px_rgba(255,215,0,0.25)]'}`}>
+                <div className="text-left">
+                  <div className="font-semibold">Generate Report</div>
+                  <div className="text-xs text-muted-foreground">Go to reports</div>
+                </div>
+              </a>
+            </div>
+          </Card>
+
+          <Card className={`p-6 ${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'} lg:col-span-2`}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold">Active Job Postings</h2>
+              <Briefcase className="w-6 h-6 text-primary" />
+            </div>
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Position</TableHead>
+                    <TableHead>Company</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Eligibility</TableHead>
+                    <TableHead>Applications</TableHead>
+                    <TableHead>Deadline</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {jobs.map((job) => (
+                    <TableRow key={job.id}>
+                      <TableCell className="font-medium">{job.title}</TableCell>
+                      <TableCell>{job.company}</TableCell>
+                      <TableCell>
+                        <Badge variant={job.type === 'Full-time' ? 'default' : 'secondary'}>
+                          {job.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {job.eligibility.map((criteria, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs">
+                              {criteria}
+                            </Badge>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell>{job.applicants}</TableCell>
+                      <TableCell>{job.deadline}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        </div>
         <Card className={`p-6 ${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'}`}>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold">Active Job Postings</h2>
@@ -376,10 +527,10 @@ const DepartmentDashboard = () => {
           </div>
         </Card>
 
-        {/* Meetings & Announcements */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Meetings & Announcements & Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Meetings */}
-          <Card className={`p-6 ${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'}`}>
+          <Card className={`p-6 ${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'} lg:col-span-1`}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold">Upcoming Meetings</h2>
               <Calendar className="w-6 h-6 text-primary" />
@@ -399,7 +550,7 @@ const DepartmentDashboard = () => {
           </Card>
 
           {/* Announcements */}
-          <Card className={`p-6 ${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'}`}>
+          <Card className={`p-6 ${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'} lg:col-span-1`}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-2xl font-bold">Recent Announcements</h2>
               <Bell className="w-6 h-6 text-primary" />
@@ -419,6 +570,22 @@ const DepartmentDashboard = () => {
                   </div>
                   <p className="text-sm text-muted-foreground mb-2">{announcement.content}</p>
                   <p className="text-xs text-muted-foreground">{announcement.date}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          {/* Activity Feed */}
+          <Card className={`p-6 ${theme === 'neon' ? 'glass neon-border' : 'glass-luxe'} lg:col-span-1`}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold">Recent Activity</h2>
+            </div>
+            <div className="space-y-4">
+              {activityFeed.map(item => (
+                <div key={item.id} className="relative pl-6">
+                  <div className="absolute left-0 top-1.5 w-2 h-2 rounded-full bg-primary" />
+                  <div className="font-medium">{item.text}</div>
+                  <div className="text-xs text-muted-foreground">{item.time}</div>
                 </div>
               ))}
             </div>
